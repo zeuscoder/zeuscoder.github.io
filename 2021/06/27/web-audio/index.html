@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="description" content="穷则独善其身">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    WEB：Audio 音频基础 |
+    
+    zeus の blog</title>
+  
+  <link rel="shortcut icon" href="/zeus.ico">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+  
+  <script src="/js/pace.min.js"></script>
+</head></html>
+
+<body>
+  <main class="content">
+    <section class="outer">
+  <article id="post-web-audio" class="article article-type-post" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+      
+
+<h1 class="article-title" itemprop="name">
+  WEB：Audio 音频基础
+</h1>
+
+
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2021/06/27/web-audio/" class="article-date">
+  <time datetime="2021-06-27T03:01:01.000Z" itemprop="datePublished">2021-06-27</time>
+</a>
+      
+    </div>
+    
+
+    
+    
+<div class="tocbot"></div>
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+      
+      <p>Web Audio（AduioContext） 的 API 实在太多了，玩起来也会很有趣。</p>
+<a id="more"></a>
+<p><img src="/images/web-audio/audio.jpeg" alt="PCM"></p>
+<h2 id="基础概念"><a href="#基础概念" class="headerlink" title="基础概念"></a>基础概念</h2><p>声音：根据初中物理知识，声音是由物体振动产生的<strong>声波</strong>，通过介质（空气或固体、液体）传播，被人或动物听觉器官所感知的波动现象。气压的变化会产生声音信号，声音是一种波。人的耳朵可以听到20~20000Hz的声音，最敏感是200~800Hz之间的声音（频率越高音调 pitch 越高）。</p>
+<p>我们可以测量压力变化的强度，并绘制随时间变化的测量值。其中音频采样，是把声音从模拟信号转换为数字信号，所得的被称为 <code>PCM</code> 。</p>
+<h2 id="PCM"><a href="#PCM" class="headerlink" title="PCM"></a>PCM</h2><p> <code>PCM</code> (脉冲编码调制）有<a href="https://www.cnblogs.com/yongdaimi/p/10722355.html" target="_blank" rel="noopener">三要素</a>：声道数（channel number）、采样率（sample rate）、采样位数或位深（bit depth）。</p>
+<p><img src="/images/web-audio/audio-steps.png" alt="PCM"></p>
+<blockquote>
+<p>PCM 是一种编码格式，WAV 是一种文件格式。</p>
+</blockquote>
+<p><img src="/images/web-audio/pcm.png" alt="PCM"></p>
+<h3 id="声道数"><a href="#声道数" class="headerlink" title="声道数"></a>声道数</h3><p>声道数，常见的声道（喇叭数量）类型：</p>
+<ul>
+<li>单声道：Mono，单喇叭或者两个喇叭输出同一个声道的声音（<strong>ASR 录音用的是单声道</strong>）</li>
+<li>双声道：Stereo，分左声道和右声道，更加有空间效果</li>
+</ul>
+<p><img src="/images/web-audio/channel.png" alt="双声道"></p>
+<h3 id="采样率"><a href="#采样率" class="headerlink" title="采样率"></a>采样率</h3><p>采样率：每秒对声音进行采集的次数，同样也是所得的数字信号的每秒样本数，单位为 Hz。<strong>采样率越高，声音的质量就越好，声音的还原就越真实越自然。</strong></p>
+<p>当然人耳对频率识别范围有限，超过 48k 的采样率意义不大，一般 20k 可以满足， <strong>22050 Hz</strong> 为常用的采样频率。</p>
+<ul>
+<li>采样率：数字音频系统记录声音信号时每秒采集的数据个数</li>
+<li>声音频率：物体每秒的震动频率</li>
+</ul>
+<blockquote>
+<p><a href="https://www.zhihu.com/question/27644914" target="_blank" rel="noopener">声音频率和采样率的区别</a>：其实它们之间没有直接关系。</p>
+</blockquote>
+<p><img src="/images/web-audio/sample-rate.png" alt="采样率"></p>
+<h3 id="采样位数"><a href="#采样位数" class="headerlink" title="采样位数"></a>采样位数</h3><p>采样位数：采样后，将采样的单个样本进行量化，用来衡量声音波动变化的一个参数，也可以说是声卡的分辨率。<strong>它的数值越大，分辨率也就越高，所发出声音的能力就越强。</strong></p>
+<p>n-bit 指的是声音的强度（振幅）被均分为 2^n 级，常用的有 8bit（1字节）、<code>16bit（2字节）</code>、32bit（4字节）。</p>
+<p>在把量化所得的结果，即单个声道的样本，以<code>二进制</code>的码字进行存放。</p>
+<blockquote>
+<p>B for Byte (字节)， b for bit（位）。1 Byte = 8 bit</p>
+</blockquote>
+<p><img src="/images/web-audio/bit-depth.png" alt="采样位数"></p>
+<h3 id="比特率"><a href="#比特率" class="headerlink" title="比特率"></a>比特率</h3><p>比特率：每秒的传输速率，单位为 bps。</p>
+<p>采样率为 16khz，位深为 16 bit，单声道的比特率为 <code>16000 * 16 * 1 = 256000 b/s（比特/秒）</code>，转化为字节 <code>256000 / 8 = 32000 B/s（字节/秒）</code>。</p>
+<blockquote>
+<p>通常说的 10M 带宽为 10Mbps（这里是比特），下载速率为 10M / 8 = 1.25 MB/s（这里是字节）</p>
+</blockquote>
+<h2 id="音频采集"><a href="#音频采集" class="headerlink" title="音频采集"></a>音频采集</h2><p>讲述 PCM 的基础概念后，如何通过浏览器实现音频采集。</p>
+<h3 id="getUserMedia"><a href="#getUserMedia" class="headerlink" title="getUserMedia"></a>getUserMedia</h3><p>实现媒体音频采集的 <code>WebRTC</code> 技术，使用的方法是 <code>navigator.mediaDevices.getUserMedia()</code>。麦克风或摄像头的启用涉及到安全隐私，通常网页中会有弹框提示，用户确认后才可启用相关功能，调用成功后，回调函数中就可以得到多媒体流对象，后续的工作就是围绕这个流媒体展开的。</p>
+<p><img src="/images/web-audio/web-audio-api.png" alt="wav-audio-api"></p>
+<h3 id="HTTPS-vs-HTTP"><a href="#HTTPS-vs-HTTP" class="headerlink" title="HTTPS vs HTTP"></a>HTTPS vs HTTP</h3><p>获取麦克风权限时需要 https 协议下验证，如何能在 http 网站情况下也可以获取<a href="chrome://flags/#unsafely-treat-insecure-origin-as-secure" target="_blank" rel="noopener">权限</a>。</p>
+<blockquote>
+<p>chrome://flags/#unsafely-treat-insecure-origin-as-secure</p>
+</blockquote>
+<h3 id="设备兼容情况"><a href="#设备兼容情况" class="headerlink" title="设备兼容情况"></a>设备兼容情况</h3><p>Android WebView 和 Chrome 支持程度较好，Mac 和 iPhone Safari 支持系统版本 11 及以上，<strong>iOS WKWebView 支持系统版本 14.3 及以上（iOS 微信内置浏览器和小程序 web-view 使用的是 WKWebView）</strong>。</p>
+<p><img src="/images/web-audio/getUserMedia.jpeg" alt="getUserMedia"></p>
+<h2 id="音频播放"><a href="#音频播放" class="headerlink" title="音频播放"></a>音频播放</h2><p>如何播放音频采集后得到的 PCM：AudioContext 不能直接播放 PCM，需要给 PCM <strong>添加 wav 头部</strong>，才能通过 AudioContext 转换为 AudioBuffer 播放。</p>
+<h3 id="WAV-Header"><a href="#WAV-Header" class="headerlink" title="WAV Header"></a>WAV Header</h3><p>wav 格式是一种无损格式，是依据规范在 pcm 数据前添加 <strong>44</strong> 个<strong>字节</strong>长度用来填充一些声明信息的。wav 头部有 44 个字节，具体对应如下：</p>
+<p><img src="/images/web-audio/wav-header.png" alt="wav 头部"></p>
+<details>
+<summary>如何添加 wav 头部代码</summary>
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line">public generateWavHeader(options: IWavHeaderOptions): <span class="built_in">ArrayBuffer</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> &#123;</span><br><span class="line">    numFrames = originArrayBuffer.byteLength, <span class="comment">// originArrayBuffer 为源 PCM</span></span><br><span class="line">    numChannels = <span class="number">1</span>,</span><br><span class="line">    sampleRate = <span class="number">16000</span>,</span><br><span class="line">    bytesPerSample = <span class="number">2</span></span><br><span class="line">  &#125; = options;</span><br><span class="line">  <span class="keyword">const</span> blockAlign = numChannels * bytesPerSample;</span><br><span class="line">  <span class="keyword">const</span> byteRate = sampleRate * blockAlign;</span><br><span class="line">  <span class="keyword">const</span> chunkSize = (numFrames <span class="keyword">as</span> number) * blockAlign;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> buffer = <span class="keyword">new</span> <span class="built_in">ArrayBuffer</span>(<span class="number">44</span>);</span><br><span class="line">  <span class="keyword">const</span> dataview = <span class="keyword">new</span> <span class="built_in">DataView</span>(buffer);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> position = <span class="number">0</span>;</span><br><span class="line">  position = <span class="keyword">this</span>.dataviewWriteString(dataview, <span class="string">'RIFF'</span>, position); <span class="comment">// ChunkID</span></span><br><span class="line">  position = <span class="keyword">this</span>.dataviewWriteUint32(dataview, chunkSize + <span class="number">36</span>, position); <span class="comment">// ChunkSize</span></span><br><span class="line">  position = <span class="keyword">this</span>.dataviewWriteString(dataview, <span class="string">'WAVE'</span>, position); <span class="comment">// Format</span></span><br><span class="line">  position = <span class="keyword">this</span>.dataviewWriteString(dataview, <span class="string">'fmt '</span>, position); <span class="comment">// Subchunk1ID</span></span><br><span class="line">  position = <span class="keyword">this</span>.dataviewWriteUint32(dataview, <span class="number">16</span>, position); <span class="comment">// Subchunk1Size</span></span><br><span class="line">  position = <span class="keyword">this</span>.dataviewWriteUint16(dataview, <span class="number">1</span>, position); <span class="comment">// AudioFormat</span></span><br><span class="line">  position = <span class="keyword">this</span>.dataviewWriteUint16(dataview, numChannels, position); <span class="comment">// NumChannels</span></span><br><span class="line">  position = <span class="keyword">this</span>.dataviewWriteUint32(dataview, sampleRate, position); <span class="comment">// SampleRate</span></span><br><span class="line">  position = <span class="keyword">this</span>.dataviewWriteUint32(dataview, byteRate, position); <span class="comment">// ByteRate</span></span><br><span class="line">  position = <span class="keyword">this</span>.dataviewWriteUint16(dataview, blockAlign, position); <span class="comment">// BlockAlign</span></span><br><span class="line">  position = <span class="keyword">this</span>.dataviewWriteUint16(dataview, bytesPerSample * <span class="number">8</span>, position); <span class="comment">// BitsPerSample</span></span><br><span class="line">  position = <span class="keyword">this</span>.dataviewWriteString(dataview, <span class="string">'data'</span>, position); <span class="comment">// Subchunk2ID</span></span><br><span class="line">  <span class="keyword">this</span>.dataviewWriteUint32(dataview, chunkSize, position); <span class="comment">//  Subchunk2Size</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> buffer;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">public concatArrayBuffer(...buffers: <span class="built_in">ArrayBuffer</span>[]): <span class="built_in">ArrayBuffer</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> newBufferLength = buffers.reduce(<span class="function">(<span class="params">total, buffer</span>) =&gt;</span> &#123;</span><br><span class="line">    total += buffer.byteLength;</span><br><span class="line">    <span class="keyword">return</span> total;</span><br><span class="line">  &#125;, <span class="number">0</span>);</span><br><span class="line">  <span class="keyword">const</span> newBuffer = <span class="keyword">new</span> <span class="built_in">Uint8Array</span>(newBufferLength);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> bufferIndex = <span class="number">0</span>;</span><br><span class="line">  buffers.forEach(<span class="function">(<span class="params">buffer</span>) =&gt;</span> &#123;</span><br><span class="line">    newBuffer.set(<span class="keyword">new</span> <span class="built_in">Uint8Array</span>(buffer), bufferIndex);</span><br><span class="line">    bufferIndex += buffer.byteLength;</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> newBuffer.buffer;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private dataviewWriteString(</span><br><span class="line">  dataview: <span class="built_in">DataView</span>,</span><br><span class="line">  str: string,</span><br><span class="line">  position: number</span><br><span class="line">): number &#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; str.length; i++) &#123;</span><br><span class="line">    dataview.setUint8(position + i, str.charCodeAt(i));</span><br><span class="line">  &#125;</span><br><span class="line">  position += str.length;</span><br><span class="line">  <span class="keyword">return</span> position;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private dataviewWriteUint32(</span><br><span class="line">  dataview: <span class="built_in">DataView</span>,</span><br><span class="line">  num: number,</span><br><span class="line">  position: number</span><br><span class="line">): number &#123;</span><br><span class="line">  dataview.setUint32(position, num, <span class="literal">true</span>);</span><br><span class="line">  position += <span class="number">4</span>;</span><br><span class="line">  <span class="keyword">return</span> position;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">private dataviewWriteUint16(</span><br><span class="line">  dataview: <span class="built_in">DataView</span>,</span><br><span class="line">  num: number,</span><br><span class="line">  position: number</span><br><span class="line">): number &#123;</span><br><span class="line">  dataview.setUint16(position, num, <span class="literal">true</span>);</span><br><span class="line">  position += <span class="number">2</span>;</span><br><span class="line">  <span class="keyword">return</span> position;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</details>
+
+<p>通过浏览器打印日志或者通过记事本打开 WAV 格式的音频 可以发现：</p>
+<p><img src="/images/web-audio/arrayBuffer.png" alt="wav 头部"></p>
+<p>WAV文件格式的结构组成，对该内容进行分析如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">52</span> <span class="number">49</span> <span class="number">46</span> <span class="number">46</span>（ChunkID，<span class="number">4</span> 字节） = ‘RIFF’</span><br><span class="line"></span><br><span class="line"><span class="number">24</span> <span class="number">42</span> <span class="number">04</span> <span class="number">00</span> （ChunkSize，<span class="number">4</span> 字节）=  <span class="number">279076</span>  = <span class="number">279084</span> - <span class="number">8</span></span><br><span class="line"></span><br><span class="line"><span class="number">57</span> <span class="number">41</span> <span class="number">56</span> <span class="number">45</span> （Format，<span class="number">4</span> 字节） = ‘WAVE’</span><br><span class="line"></span><br><span class="line"><span class="number">66</span> <span class="number">6</span>D <span class="number">74</span> <span class="number">20</span> （Subchunk1ID，<span class="number">4</span> 字节） = ‘fmt ’</span><br><span class="line"></span><br><span class="line"><span class="number">10</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> (Subchunk1 Size，<span class="number">4</span> 字节) = <span class="number">16</span></span><br><span class="line"></span><br><span class="line"><span class="number">01</span> <span class="number">00</span>（AudioFormate，<span class="number">2</span> 字节） = 音频格式 = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="number">01</span> <span class="number">00</span> （NumChannels，<span class="number">2</span> 字节）= 声道数 = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="number">80</span> <span class="number">3</span>E <span class="number">00</span> <span class="number">00</span>（SampleRate，<span class="number">4</span> 字节）= 采样率 = <span class="number">16000</span></span><br><span class="line"></span><br><span class="line"><span class="number">00</span> <span class="number">7</span>D <span class="number">00</span> <span class="number">00</span>（ByteRate，<span class="number">4</span> 字节）= 字节率 = <span class="number">32000</span> = <span class="number">16000</span> * <span class="number">16</span> / <span class="number">8</span></span><br><span class="line"></span><br><span class="line"><span class="number">02</span> <span class="number">00</span> （BlockAlign，<span class="number">2</span> 字节）= 内存对齐 = <span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="number">10</span> <span class="number">00</span> （BitsPerSample）= 每个样本的位深度 =  <span class="number">16</span></span><br><span class="line"></span><br><span class="line"><span class="number">64</span> <span class="number">61</span> <span class="number">74</span> <span class="number">61</span>（Subchunk2ID，<span class="number">4</span> 字节） = ‘data’</span><br><span class="line"></span><br><span class="line"><span class="number">00</span> <span class="number">42</span> <span class="number">04</span> <span class="number">00</span> (Subchunk2 Size，<span class="number">4</span> 字节) = 音频PCM数据大小 = <span class="number">279040</span> = <span class="number">279084</span> - <span class="number">44</span></span><br></pre></td></tr></table></figure>
+<p><img src="/images/web-audio/wav-header-detail.jpeg" alt="wav 头部分析"></p>
+<h3 id="降噪（消除毛刺）"><a href="#降噪（消除毛刺）" class="headerlink" title="降噪（消除毛刺）"></a>降噪（消除毛刺）</h3><p>通过 <code>AudioContext</code> 的 <code>decodeAudioData</code> API 生成的 Audiobuffer，连续播放短小的 Audiobuffer 时可能会有细微的噪音出现，其中<a href="https://stackoverflow.com/questions/53100047/why-state-can-be-invalid-in-web-audio-in-safari-after-resume" target="_blank" rel="noopener">降噪</a>的方法如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">deNoising</span>(<span class="params">buffer: AudioBuffer</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> fixRange = <span class="number">100</span>; <span class="comment">// 该数值根据情况调整</span></span><br><span class="line">  <span class="keyword">const</span> audioBufferArray = buffer.getChannelData(<span class="number">0</span>);</span><br><span class="line">  <span class="keyword">const</span> length = audioBufferArray.length;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; fixRange; i++) &#123;</span><br><span class="line">    audioBufferArray[i] = (audioBufferArray[i] * i) / fixRange; <span class="comment">// fade in</span></span><br><span class="line">    audioBufferArray[length - i - <span class="number">1</span>] =</span><br><span class="line">      (audioBufferArray[length - i - <span class="number">1</span>] * i) / fixRange; <span class="comment">// fade out</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<!-- #### AudioContext -->
+<h3 id="PCM-播放工具"><a href="#PCM-播放工具" class="headerlink" title="PCM 播放工具"></a>PCM 播放工具</h3><p>音频混音器：<a href="https://www.audacityteam.org/" target="_blank" rel="noopener">Audacity</a></p>
+<p><img src="/images/web-audio/audacity.png" alt="audacity"></p>
+<h2 id="ArrayBuffer"><a href="#ArrayBuffer" class="headerlink" title="ArrayBuffer"></a>ArrayBuffer</h2><p><code>ArrayBuffer</code> 对象用来表示通用的、<em>固定长度</em>的<strong>原始二进制数据缓冲区</strong>（预分配内存）。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> buffer = <span class="keyword">new</span> <span class="built_in">ArrayBuffer</span>(<span class="number">16</span>); <span class="comment">// 16 字节长度的 ArrayBuffer</span></span><br><span class="line"><span class="built_in">console</span>.log(buffer.byteLength);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>单位是<strong>字节</strong>，它是一个字节数组，通常在其他语言中称为 byte array</li>
+<li>不能<strong>直接操作</strong> <code>ArrayBuffer</code> 的内容，只能通过 DataView 或者定型数组对象操作</li>
+<li>ArrayBuffer 分配的内存<strong>不能超过</strong> Number.MAX_SAFE_INTEGER(2^53 - 1) 字节</li>
+</ul>
+<h3 id="DataView"><a href="#DataView" class="headerlink" title="DataView"></a>DataView</h3><p><code>DataView</code> 视图是一个可以从二进制 <em>ArrayBuffer</em> 对象中读写多种数值类型的底层接口，使用它时不用考虑不同平台的<code>字节序</code>问题。</p>
+<blockquote>
+<p>必须在对已有的 ArrayBuffer 读取或写入时才能创建 DataView 实例。</p>
+</blockquote>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> buffer = <span class="keyword">new</span> <span class="built_in">ArrayBuffer</span>(<span class="number">16</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> dataview = <span class="keyword">new</span> <span class="built_in">DataView</span>(buffer);</span><br><span class="line">dataview.setUint8(<span class="number">0</span>, <span class="number">255</span>);</span><br><span class="line">dataview.setUint8(<span class="number">1</span>, <span class="number">0xff</span>);</span><br><span class="line"><span class="built_in">console</span>.log(dataview.byteOffset);</span><br><span class="line"><span class="built_in">console</span>.log(dataview.byteLength);</span><br><span class="line"><span class="built_in">console</span>.log(dataview.buffer === buffer); <span class="comment">// DataViiew 维护着对该缓冲实例的引用</span></span><br></pre></td></tr></table></figure>
+<p>要通过 DataView 读取缓冲，还需要以下几点：</p>
+<ul>
+<li>首先是要读或者写的字节偏移量。可以看出 DataView 中的某种“地址”</li>
+<li>DataView 应该使用 ElementType 来实现 Javascript 的 Number 类型到缓冲内二进制格式的转换</li>
+<li>最后是内存中值的字节序。默认为大端字节序</li>
+</ul>
+<h3 id="定型数组"><a href="#定型数组" class="headerlink" title="定型数组"></a>定型数组</h3><p><img src="/images/web-audio/dataview-type.jpeg" alt="DataView Element Type"></p>
+<h3 id="字节序"><a href="#字节序" class="headerlink" title="字节序"></a>字节序</h3><p><a href="https://developer.mozilla.org/zh-CN/docs/Glossary/Endianness" target="_blank" rel="noopener">字节序</a>，或字节顺序（”Endian”、”endianness” 或 “byte-order”），描述了计算机如何组织字节，组成对应的数字。</p>
+<p>每一个字节可以存储一个 8 位（bit）的数字（0x00-0xff），存储更大数字需要多个字节，现在大部分需占用多字节的数字排列方式是 little-endian（低位字节排放在内存中低地址端，高字节排放在内存的高地址端），与 big-endian 相反。</p>
+<p>举例：用不同字节序存储数字 <code>0x12345678</code>(即十进制中的 305 419 896)</p>
+<ul>
+<li>little-endian：<code>0x78 0x56 0x34 0x12</code></li>
+<li>big-endian：<code>0x12 0x34 0x56 0x78</code></li>
+</ul>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><h3 id="iOS-Q-amp-A"><a href="#iOS-Q-amp-A" class="headerlink" title="iOS Q&amp;A"></a>iOS Q&amp;A</h3><h3 id="缓冲（Buffer）-vs-缓存（Cache）"><a href="#缓冲（Buffer）-vs-缓存（Cache）" class="headerlink" title="缓冲（Buffer） vs 缓存（Cache）"></a>缓冲（Buffer） vs 缓存（Cache）</h3><p>寄语：WebRTC 太多要学习的，后续再进一步研究。</p>
+<p>参考文章：</p>
+<p><a href="https://www.cnblogs.com/yongdaimi/p/10722355.html" target="_blank" rel="noopener">音频属性相关：声道、采样率、采样位数、样本格式、比特率</a></p>
+<p><a href="https://rtcdeveloper.com/t/topic/21480" target="_blank" rel="noopener">让音视频学习变得简单之音频深度学习</a></p>
+<p><a href="http://soundfile.sapp.org/doc/WaveFormat/" target="_blank" rel="noopener">WAVE PCM soundfile format</a></p>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer" target="_blank" rel="noopener">ArrayBuffer MDN</a></p>
+<p>Javascript 高级程序设计（第四版）：定型数组</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://zeuscoder.github.io/2021/06/27/web-audio/" data-id="ckqhite760000zxr2r47p7dd9" class="article-share-link">
+        分享
+      </a>
+      
+    </footer>
+
+  </div>
+
+  
+  
+<nav class="article-nav">
+  
+  
+  <a href="/2021/03/07/react/" class="article-nav-link">
+    <strong class="article-nav-caption">后一篇</strong>
+    <div class="article-nav-title">react</div>
+  </a>
+  
+</nav>
+
+  
+
+  
+  
+  
+  
+
+</article>
+</section>
+    <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+  <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+  <li><i class="fe fe-bookmark"></i> <span id="busuanzi_value_page_pv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>zeus の blog &copy; 2021</li>
+      
+        <li></li>
+      
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>theme  <a href="https://github.com/zhwangart/hexo-theme-ocean">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+  </main>
+  <aside class="sidebar">
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/zeus.png" alt="zeus の blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/gallery">相册</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="搜索">
+        <i class="fe fe-search"></i>
+        搜索
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="fe fe-feed"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+<script src="/js/lazyload.min.js"></script>
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+<script src="/js/copybtn.js"></script>
+
+
+
+<script src="/js/tocbot.min.js"></script>
+<script>
+  // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+  });
+</script>
+
+
+<script src="/js/ocean.js"></script>
+</body>
+
+</html>
