@@ -10,7 +10,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>
-    WEB：Next Nuxt Nest 傻傻分不清楚 |
+    WEB：常见的安全问题 |
     
     zeus の blog</title>
   
@@ -32,7 +32,7 @@
 <body>
   <main class="content">
     <section class="outer">
-  <article id="post-next-nuxt-nest" class="article article-type-post" itemscope
+  <article id="post-security" class="article article-type-post" itemscope
   itemprop="blogPost" data-scroll-reveal>
 
   <div class="article-inner">
@@ -41,7 +41,7 @@
       
 
 <h1 class="article-title" itemprop="name">
-  WEB：Next Nuxt Nest 傻傻分不清楚
+  WEB：常见的安全问题
 </h1>
 
 
@@ -51,8 +51,8 @@
 
     
     <div class="article-meta">
-      <a href="/2023/04/18/next-nuxt-nest/" class="article-date">
-  <time datetime="2023-04-18T08:37:05.000Z" itemprop="datePublished">2023-04-18</time>
+      <a href="/2024/01/09/security/" class="article-date">
+  <time datetime="2024-01-09T06:13:25.000Z" itemprop="datePublished">2024-01-09</time>
 </a>
       
     </div>
@@ -68,23 +68,20 @@
       
       
       
-      <p><code>Next</code> 和 <code>Nuxt</code> 是常见的 <code>SSR</code> 框架，而 <code>Nest</code> 是 <code>Nodejs</code> 服务器端应用的框架。</p>
+      <p>本文涉及公司内部镜像安全问题。</p>
 <span id="more"></span>
 
-<h3 id="Nuxt-Vue"><a href="#Nuxt-Vue" class="headerlink" title="Nuxt(Vue)"></a>Nuxt(Vue)</h3><blockquote>
-<p><a href="https://nuxt.com.cn/">Nuxt</a> 是一个开源框架，它提供了一种直观且可扩展的方式来创建类型安全、高性能和生产级别的全栈Web应用和网站，使用的是Vue.js。</p>
-</blockquote>
-<h3 id="Next-React"><a href="#Next-React" class="headerlink" title="Next(React)"></a>Next(React)</h3><blockquote>
-<p><a href="https://www.nextjs.cn/">Nextjs</a> 为您提供生产环境所需的所有功能以及最佳的开发体验：包括静态及服务器端融合渲染、 支持 TypeScript、智能化打包、 路由预取等功能 无需任何配置。</p>
-</blockquote>
-<h3 id="Nest-Turbo"><a href="#Nest-Turbo" class="headerlink" title="Nest(Turbo)"></a>Nest(Turbo)</h3><blockquote>
-<p><a href="https://nest.nodejs.cn/#google_vignette">Nest</a> (NestJS) 是一个用于构建高效、可扩展的 Node.js 服务器端应用的框架。它使用渐进式 JavaScript，构建并完全支持 TypeScript（但仍然允许开发者使用纯 JavaScript 进行编码）并结合了 OOP（面向对象编程）、FP（函数式编程）和 FRP（函数式反应式编程）的元素。</p>
-</blockquote>
+<h3 id="镜像版本安全问题"><a href="#镜像版本安全问题" class="headerlink" title="镜像版本安全问题"></a>镜像版本安全问题</h3><h4 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h4><p>根据 <a href="https://zeuscoder.github.io/2020/09/06/docker/">DevOps：Docker 实操笔记</a> 一文中 <a href="https://cli.vuejs.org/zh/guide/deployment.html#bitbucket-cloud">Vue-cli 项目部署 Dockerfile 实例</a>，前端项目会在构建镜像时分别用到了 <code>node</code> 和 <code>nginx</code> 镜像。</p>
+<p>由于不同安全手段的测试，低版本镜像往往会检测出劫持漏洞问题，<strong>但仅需要升级对应的版本即可</strong>。</p>
+<h4 id="本地推送-docker-镜像到内部仓库"><a href="#本地推送-docker-镜像到内部仓库" class="headerlink" title="本地推送 docker 镜像到内部仓库"></a>本地推送 docker 镜像到内部仓库</h4><p>由于公司可能采用的是内部镜像仓库，往往需要手动推送合适的 docker 镜像到内部仓库。</p>
+<p>假设公司镜像仓库地址：registry.zeuscoder.com</p>
+<p>以推送不同版本 node 的 docker 镜像为例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">本地打开终端（确认本地已安装且开启 docker）：</span></span><br><span class="line">docker login --username=[自己的账号] registry.zeuscoder.com</span><br><span class="line"><span class="meta prompt_"> </span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">输入密码：自己的密码</span></span><br><span class="line"><span class="meta prompt_"> </span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">从 dockerhub 拉取对应镜像：</span></span><br><span class="line">docker push node:[镜像版本号]</span><br><span class="line"><span class="meta prompt_"> </span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">获取镜像 imageId：</span></span><br><span class="line">docker images ｜ grep node:[镜像版本号]</span><br><span class="line"><span class="meta prompt_"> </span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">本地打 tag：</span></span><br><span class="line">docker tag [ImageId]  registry.zeuscoder.com/library/node:[镜像版本号]</span><br><span class="line"><span class="meta prompt_"> </span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">推送到仓库：</span></span><br><span class="line">docker push registry.zeuscoder.com/library/node:[镜像版本号]</span><br></pre></td></tr></table></figure>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://zeuscoder.github.io/2023/04/18/next-nuxt-nest/" data-id="clvyv2suw00184bc9hfsih02p" class="article-share-link">
+      <a data-url="https://zeuscoder.github.io/2024/01/09/security/" data-id="clvyv2suz001i4bc9f8pvg104" class="article-share-link">
         分享
       </a>
       
@@ -96,19 +93,19 @@
   
 <nav class="article-nav">
   
-  <a href="/2023/05/09/web-webpack-tapable/" class="article-nav-link">
+  <a href="/2024/01/29/safe-problem/" class="article-nav-link">
     <strong class="article-nav-caption">前一篇</strong>
     <div class="article-nav-title">
       
-      WEB：webpack tapable
+      WEB：一次偶然的依赖库安全问题
       
     </div>
   </a>
   
   
-  <a href="/2023/04/13/vue-ssr/" class="article-nav-link">
+  <a href="/2024/01/04/web-chrome-devtool/" class="article-nav-link">
     <strong class="article-nav-caption">后一篇</strong>
-    <div class="article-nav-title">WEB：Vue SSR</div>
+    <div class="article-nav-title">Web：前端提效工具集合</div>
   </a>
   
 </nav>
