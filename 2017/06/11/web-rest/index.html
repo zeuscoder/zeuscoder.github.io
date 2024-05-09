@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="description" content="穷则独善其身">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    WEB：我所理解的REST |
+    
+    zeus の blog</title>
+  
+  <link rel="shortcut icon" href="/zeus.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+<body>
+  <main class="content">
+    <section class="outer">
+  <article id="post-web-rest" class="article article-type-post" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+      
+
+<h1 class="article-title" itemprop="name">
+  WEB：我所理解的REST
+</h1>
+
+
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2017/06/11/web-rest/" class="article-date">
+  <time datetime="2017-06-11T14:37:00.000Z" itemprop="datePublished">2017-06-11</time>
+</a>
+      
+<div class="article-category">
+  <a class="article-category-link" href="/categories/web/">web</a>
+</div>
+
+    </div>
+    
+
+    
+    
+<div class="tocbot"></div>
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+      
+      <p>REST：REpresentational State Transfer，表现层状态转换，是浏览器和服务器通信方式的一种__设计风格__。
+ <span id="more"></span></p>
+<h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>表现层状态转换 &#x3D; 表现层 + 状态转换。<br>
+表现层：其实指的就是“__资源__”的具体表现形式<br>
+状态转换：“__资源__”操作（动词）</p>
+<h3 id="核心"><a href="#核心" class="headerlink" title="核心"></a>核心</h3><p>核心概念：__资源__（REST 以资源为核心展开）</p>
+<ul>
+<li>互联网所有可以访问的内容，都是__资源__</li>
+<li>服务器保存__资源__，客户端请求__资源__</li>
+<li>同一个__资源__，有多种表现形式</li>
+<li>协议本身不带有状态，通信时客户端必须通过参数表示请求不同状态的__资源__</li>
+<li>状态转换通过 HTTP 动词表示</li>
+</ul>
+<h3 id="设计"><a href="#设计" class="headerlink" title="设计"></a>设计</h3><p>URL 是__资源__的唯一标识符。<br>
+URL 定位资源，用 HTTP 动词（GET, POST，PUT， DELETE）描述操作。<br>
+URL 只使用__名词__来指定资源，原则上不使用动词。</p>
+<p><img src="/images/web-rest/rest-transfer.png" alt="boxModel"></p>
+<h3 id="RESTful"><a href="#RESTful" class="headerlink" title="RESTful"></a>RESTful</h3><p>RESTful架构：符合 REST 风格的设计</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://zeuscoder.github.io/2017/06/11/web-rest/" data-id="clvynbzpm001xazc97isv0hgd" class="article-share-link">
+        分享
+      </a>
+      
+    </footer>
+
+  </div>
+
+  
+  
+<nav class="article-nav">
+  
+  <a href="/2017/06/30/http-cache/" class="article-nav-link">
+    <strong class="article-nav-caption">前一篇</strong>
+    <div class="article-nav-title">
+      
+      HTTP：HTTP缓存的那些事
+      
+    </div>
+  </a>
+  
+  
+  <a href="/2017/06/07/css-position/" class="article-nav-link">
+    <strong class="article-nav-caption">后一篇</strong>
+    <div class="article-nav-title">CSS：Position Float Clear属性略解</div>
+  </a>
+  
+</nav>
+
+  
+
+  
+  
+  
+  
+
+</article>
+</section>
+    <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+  <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+  <li><i class="fe fe-bookmark"></i> <span id="busuanzi_value_page_pv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>zeus の blog &copy; 2024</li>
+      
+        <li></li>
+      
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>theme  <a href="https://github.com/zhwangart/hexo-theme-ocean">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+  </main>
+  <aside class="sidebar">
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/zeus.png" alt="zeus の blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/gallery">相册</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="搜索">
+        <i class="fe fe-search"></i>
+        搜索
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="fe fe-feed"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+
+<script src="/js/wrapImage.js"></script>
+
+
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/copybtn.js"></script>
+
+
+
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+  });
+</script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+</body>
+
+</html>

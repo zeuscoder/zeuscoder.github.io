@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="description" content="穷则独善其身">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    DevOps：Nginx 部署的一个有趣问题 |
+    
+    zeus の blog</title>
+  
+  <link rel="shortcut icon" href="/zeus.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+<body>
+  <main class="content">
+    <section class="outer">
+  <article id="post-nginx-error" class="article article-type-post" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+      
+
+<h1 class="article-title" itemprop="name">
+  DevOps：Nginx 部署的一个有趣问题
+</h1>
+
+
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2021/11/23/nginx-error/" class="article-date">
+  <time datetime="2021-11-23T06:56:01.000Z" itemprop="datePublished">2021-11-23</time>
+</a>
+      
+    </div>
+    
+
+    
+    
+<div class="tocbot"></div>
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+      
+      <p>浏览器访问服务器 IP 地址，页面显示的是 Apache 的默认页面。但是服务器起的是 Nginx 服务。</p>
+<span id="more"></span>
+
+<h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>Ubuntu 云服务器部署 SSL 证书，先安装了 Apache 服务，停止服务后，重新安装了 Nginx 服务。</p>
+<h3 id="排查问题过程"><a href="#排查问题过程" class="headerlink" title="排查问题过程"></a>排查问题过程</h3><ul>
+<li>首先通过 <code>lsof -i:80</code> 查看端口占用情况：</li>
+</ul>
+<p><img src="/images/nginx-error/lsof.png" alt="PCM"></p>
+<ul>
+<li><p>发现端口都是 nginx 服务在占用，然后打算重启 nginx 服务试试：<code>nginx -s reload</code>，发现页面显示的还是 Apache 的默认页面。</p>
+</li>
+<li><p>再通过 <code>kill -9 PID</code> 命令杀掉了 nginx 对应的进程后（或者可以通过 <code>nginx -s stop</code> 停止 nginx 服务），重新访问 IP 发现无法访问，证明这个 80 端口的确是 nginx 起的服务。</p>
+</li>
+<li><p>接下来就查看 nginx 配置文件指向的页面到底有没有问题，<code>cd /var/www/html</code> 目录后，发现目录下竟然有两个 html 文件：分别是 index.html 和 index.nginx-debian.html，<code>vim index.html</code> 一看，是 apache 的页面，真相大白。</p>
+</li>
+</ul>
+<h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><p>最后通过重命名 <code>mv index.nginx-debian.html index.html</code> 替换默认的 index.html。</p>
+<p>总结：安装 Apache 服务时生成了默认的 index.html 文件，而后安装的 Nginx 服务生成的默认文件无法替换，才导致起的 Nginx 服务，显示 Apache 页面的有趣问题。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://zeuscoder.github.io/2021/11/23/nginx-error/" data-id="clvynbzp9001gazc9ch97blcf" class="article-share-link">
+        分享
+      </a>
+      
+    </footer>
+
+  </div>
+
+  
+  
+<nav class="article-nav">
+  
+  <a href="/2021/11/24/nginx-https/" class="article-nav-link">
+    <strong class="article-nav-caption">前一篇</strong>
+    <div class="article-nav-title">
+      
+      DevOps：Nginx 安装部署 SSL 证书
+      
+    </div>
+  </a>
+  
+  
+  <a href="/2021/06/27/web-audio/" class="article-nav-link">
+    <strong class="article-nav-caption">后一篇</strong>
+    <div class="article-nav-title">WEB：Audio 音频基础</div>
+  </a>
+  
+</nav>
+
+  
+
+  
+  
+  
+  
+
+</article>
+</section>
+    <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+  <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+  <li><i class="fe fe-bookmark"></i> <span id="busuanzi_value_page_pv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>zeus の blog &copy; 2024</li>
+      
+        <li></li>
+      
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>theme  <a href="https://github.com/zhwangart/hexo-theme-ocean">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+  </main>
+  <aside class="sidebar">
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/zeus.png" alt="zeus の blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/gallery">相册</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="搜索">
+        <i class="fe fe-search"></i>
+        搜索
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="fe fe-feed"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+
+<script src="/js/wrapImage.js"></script>
+
+
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/copybtn.js"></script>
+
+
+
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+  });
+</script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="description" content="穷则独善其身">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    DevOps：Nginx 安装部署 SSL 证书 |
+    
+    zeus の blog</title>
+  
+  <link rel="shortcut icon" href="/zeus.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+<body>
+  <main class="content">
+    <section class="outer">
+  <article id="post-nginx-https" class="article article-type-post" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+      
+
+<h1 class="article-title" itemprop="name">
+  DevOps：Nginx 安装部署 SSL 证书
+</h1>
+
+
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2021/11/24/nginx-https/" class="article-date">
+  <time datetime="2021-11-24T04:05:49.000Z" itemprop="datePublished">2021-11-24</time>
+</a>
+      
+    </div>
+    
+
+    
+    
+<div class="tocbot"></div>
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+      
+      <p>接着上次部署遇到的问题，简单描述下云服务器安装 SSL 证书的过程。</p>
+<span id="more"></span>
+
+<p>多数云服务器网站都有部署相关的<a href="https://cloud.tencent.com/document/product/1207/47027">教程</a>，这里就基于腾讯云服务器<code>东拼西凑</code>下实现步骤。</p>
+<h3 id="运行环境"><a href="#运行环境" class="headerlink" title="运行环境"></a>运行环境</h3><ul>
+<li>服务器操作系统：CentOS 8.0</li>
+<li>服务器 Nginx 版本：Nginx 1.18.0</li>
+<li>本地 SSH 工具：Mac Termius</li>
+</ul>
+<h4 id="安装-Nginx"><a href="#安装-Nginx" class="headerlink" title="安装 Nginx"></a>安装 Nginx</h4><p>通过账号密码登录到 CentOS 服务器，<a href="https://cloud.tencent.com/document/product/214/33413">安装 Nginx 步骤</a>：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装 Nginx：</span></span><br><span class="line">yum <span class="literal">-y</span> install nginx</span><br><span class="line"><span class="comment"># 查看 Nginx 版本</span></span><br><span class="line">nginx <span class="literal">-v</span></span><br><span class="line"><span class="comment"># 查看 Nginx 安装目录</span></span><br><span class="line">rpm <span class="literal">-ql</span> nginx</span><br><span class="line"><span class="comment"># 启动 Nginx</span></span><br><span class="line">service nginx <span class="built_in">start</span></span><br></pre></td></tr></table></figure>
+
+<p>然后访问云服务器的公网 IP，如果可以显示出 Nginx 默认的静态页面，则证明 Nginx 部署成功。</p>
+<blockquote>
+<p>Nginx 的默认端口是80，如果想修改端口请修改配置文件并重启 Nginx。</p>
+</blockquote>
+<h3 id="证书部署"><a href="#证书部署" class="headerlink" title="证书部署"></a>证书部署</h3><p>SSL 证书是需要 CA 颁发的，在购买域名时一般都会有个一年的免费证书。为了测试方便，也可以使用自签名证书。</p>
+<h4 id="CA-证书"><a href="#CA-证书" class="headerlink" title="CA 证书"></a>CA 证书</h4><p>前往服务器 <code>SSL 证书管理控制台</code> 中下载 SSL 证书</p>
+<h4 id="自签名证书"><a href="#自签名证书" class="headerlink" title="自签名证书"></a>自签名证书</h4><p>生成自签名证书，可以通过<a href="https://cloud.tencent.com/developer/article/1160294">该教程</a>生成。</p>
+<h4 id="证书安装"><a href="#证书安装" class="headerlink" title="证书安装"></a>证书安装</h4><p>最后生成的证书种有两个文件：__**.crt 证书文件__ 和 __**.key 私钥文件__。</p>
+<p>我们需要做的是把这两个文件放到服务器的目录以及修改 Nginx 配置文件，<a href="https://cloud.tencent.com/document/product/1207/47027">具体教程</a>：</p>
+<ol>
+<li><p>我是通过本地 Termius 软件左侧的 <code>SFTP</code> 功能可视化放进两个文件的，也可以通过本地 <code>scp</code> 命令或者在服务器 <code>rz</code> 命令来传输文件，这里放在了服务器的 <code>/etc/nginx</code> 目录下。</p>
+</li>
+<li><p>编辑 Nginx 默认配置文件目录中的 nginx.conf 文件，<code>vim /etc/nginx/nginx.conf</code>，在 http 字段里添加：</p>
+</li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">  listen         <span class="number">443</span>;</span><br><span class="line">  server_name  ***.com;    <span class="comment">#更换上所绑定的域名，一定要是申请了证书的域名</span></span><br><span class="line">  ssl                  on;     <span class="comment">#这一行是另外添加的，意思是打开ssl功能，一定要添加。</span></span><br><span class="line">  ssl_certificate      /etc/nginx/****.crt;  <span class="comment">#这是下载下来的nginx证书的crt文件路径，绝对或者相对路径都可以</span></span><br><span class="line">  ssl_certificate_key  /etc/nginx/******.key;   <span class="comment">#和crt的规则一样</span></span><br><span class="line">  ssl_session_cache    shared:SSL:<span class="number">1</span>m;</span><br><span class="line">  ssl_session_timeout  <span class="number">5</span>m;</span><br><span class="line">  ssl_ciphers  HIGH:!aNULL:!MD5;</span><br><span class="line">  ssl_prefer_server_ciphers  on;</span><br><span class="line">  location / &#123;</span><br><span class="line">    root   html;</span><br><span class="line">    index  index.html index.htm;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>保存修改后退出，运行 <code>nginx -s reload</code> 重启 Nginx 生效。</p>
+<h4 id="设置-HTTP-请求自动跳转-HTTPS"><a href="#设置-HTTP-请求自动跳转-HTTPS" class="headerlink" title="设置 HTTP 请求自动跳转 HTTPS"></a>设置 HTTP 请求自动跳转 HTTPS</h4><p>还可以通过配置服务器，让其自动将 HTTP 的请求重定向到 HTTPS。编辑 Nginx 默认配置文件目录中的 nginx.conf 文件，<code>vim /etc/nginx/nginx.conf</code>，在 http 字段里添加：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen <span class="number">80</span>;</span><br><span class="line">    server_name cloud.tencent.com;    <span class="comment">#填写您的证书绑定的域名，例如：cloud.tencent.com</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">301</span> https://<span class="variable">$host</span><span class="variable">$request_uri</span>;       <span class="comment">#将http的域名请求转成https</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>附上：<a href="https://cloud.tencent.com/developer/article/1611144">其他教程</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://zeuscoder.github.io/2021/11/24/nginx-https/" data-id="clvynbzpa001jazc9g0zn3ebh" class="article-share-link">
+        分享
+      </a>
+      
+    </footer>
+
+  </div>
+
+  
+  
+<nav class="article-nav">
+  
+  <a href="/2021/11/27/common-shell/" class="article-nav-link">
+    <strong class="article-nav-caption">前一篇</strong>
+    <div class="article-nav-title">
+      
+      DevOps：常用快捷键备忘录
+      
+    </div>
+  </a>
+  
+  
+  <a href="/2021/11/23/nginx-error/" class="article-nav-link">
+    <strong class="article-nav-caption">后一篇</strong>
+    <div class="article-nav-title">DevOps：Nginx 部署的一个有趣问题</div>
+  </a>
+  
+</nav>
+
+  
+
+  
+  
+  
+  
+
+</article>
+</section>
+    <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+  <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+  <li><i class="fe fe-bookmark"></i> <span id="busuanzi_value_page_pv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>zeus の blog &copy; 2024</li>
+      
+        <li></li>
+      
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>theme  <a href="https://github.com/zhwangart/hexo-theme-ocean">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+  </main>
+  <aside class="sidebar">
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/zeus.png" alt="zeus の blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/gallery">相册</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="搜索">
+        <i class="fe fe-search"></i>
+        搜索
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="fe fe-feed"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+
+<script src="/js/wrapImage.js"></script>
+
+
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/copybtn.js"></script>
+
+
+
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+  });
+</script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+</body>
+
+</html>

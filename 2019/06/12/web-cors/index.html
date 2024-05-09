@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="description" content="穷则独善其身">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    WEB：躲不了的前端跨域 |
+    
+    zeus の blog</title>
+  
+  <link rel="shortcut icon" href="/zeus.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+<body>
+  <main class="content">
+    <section class="outer">
+  <article id="post-web-cors" class="article article-type-post" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+      
+
+<h1 class="article-title" itemprop="name">
+  WEB：躲不了的前端跨域
+</h1>
+
+
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2019/06/12/web-cors/" class="article-date">
+  <time datetime="2019-06-12T14:19:55.000Z" itemprop="datePublished">2019-06-12</time>
+</a>
+      
+<div class="article-category">
+  <a class="article-category-link" href="/categories/web/">web</a>
+</div>
+
+    </div>
+    
+
+    
+    
+<div class="tocbot"></div>
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+      
+      <blockquote>
+<p>同源策略限制了从同一个源加载的文档或脚本如何与来自另一个源的资源进行交互。这是一个用于隔离潜在恶意文件的重要安全机制。</p>
+</blockquote>
+<p>引用自 MDN <a href="https://developer.mozilla.org/zh-CN/docs/Web/Security/Same-origin_policy">浏览器的同源策略</a>。</p>
+<span id="more"></span>
+
+<h3 id="跨域概述"><a href="#跨域概述" class="headerlink" title="跨域概述"></a>跨域概述</h3><p>基于浏览器安全考虑，浏览器实行了__跨域安全策略（同源策略）__，保证用户信息的安全，防止恶意的网站窃取数据，因而会限制了不同域之间的资源共享。</p>
+<h4 id="同源策略-same-origin-policy"><a href="#同源策略-same-origin-policy" class="headerlink" title="同源策略(same-origin policy)"></a>同源策略(same-origin policy)</h4><p>如果 A 与 B 网页不同源，B 网页不能直接访问 A 网页的资源。</p>
+<p>同源的定义（三要素须同时相同）：</p>
+<ol>
+<li>协议相同（https | http）</li>
+<li>域名相同（zeus.com | zeus.cn）</li>
+<li>端口相同（80 | 8080）</li>
+</ol>
+<p>非同源的限制：</p>
+<ol>
+<li>Cookie、LocalStorage 和 IndexDB 无法读取。</li>
+<li>DOM 无法获得。</li>
+<li>AJAX 请求不能发送。</li>
+</ol>
+<h3 id="跨域解决方案"><a href="#跨域解决方案" class="headerlink" title="跨域解决方案"></a>跨域解决方案</h3><ul>
+<li>图像 Ping</li>
+</ul>
+<p>通过使用 &lt;img&gt; 标签的 src 属性发出请求加载图像。动态创建图像 Image，可以使用 onload 和 onerror 来确定是否接收到了相应。（也常用于跟踪用户点击页面或动态广告曝光次数，__无痕埋点应用__）</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> img = <span class="keyword">new</span> <span class="title class_">Image</span>()</span><br><span class="line"></span><br><span class="line">img.<span class="property">onload</span> = img.<span class="property">onerror</span> = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;Done&#x27;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 传递 name 等 query 参数</span></span><br><span class="line">img.<span class="property">src</span> = <span class="string">&#x27;https://zeuscoder.github.io/2019/06/12/web-cors/?name=zeus&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>缺点：</p>
+<ol>
+<li>只能发送 GET 请求</li>
+<li>无法访问服务端的响应文本</li>
+</ol>
+<ul>
+<li>JSONP(JSON with padding)</li>
+</ul>
+<p>JSONP 利用 &lt;script&gt; 标签的 src 属性指定跨域 URL。JSONP 由回调函数和数据两部分组成：<font color="#0000dd">callback({name: ‘zesu’})</font></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 前端</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">handleResponse</span>(<span class="params">response</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(response)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> script = <span class="variable language_">document</span>.<span class="title function_">createElement</span>(<span class="string">&#x27;script&#x27;</span>)</span><br><span class="line"></span><br><span class="line">script.<span class="property">src</span> = <span class="string">&#x27;https://zeuscoder.github.io/2019/06/12/web-cors/?callback=handleResponse&#x27;</span></span><br><span class="line"><span class="variable language_">document</span>.<span class="property">boby</span>.<span class="title function_">insertBefore</span>(script, <span class="variable language_">document</span>.<span class="property">body</span>.<span class="property">firstChild</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 服务端返回数据，由于在 script 标签访问，返回数据会直接作为代码运行</span></span><br><span class="line"><span class="title function_">handleResponse</span>(&#123;<span class="attr">name</span>: <span class="string">&#x27;zesu&#x27;</span>&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>不足：</p>
+<ol>
+<li>跨域加载代码运行，需要确保该域安全，否则会在响应中夹杂恶意代码，此时只能完全放弃 JSONP 调用。</li>
+<li>不能确认 JSONP 请求是否失败，script 标签的 onerror 未得到浏览器支持。</li>
+</ol>
+<ul>
+<li>CORS(Cross-origin resource sharing)</li>
+</ul>
+<p>预检请求（）</p>
+<ul>
+<li><p>代理服务器</p>
+</li>
+<li><p>document.domain</p>
+</li>
+<li><p>postMessage</p>
+</li>
+</ul>
+<p>参考文章：</p>
+<p>[1] <a href="http://www.ruanyifeng.com/blog/2016/04/same-origin-policy.html">浏览器同源政策及其规避方法</a><br>
+[2] <a href="https://segmentfault.com/a/1190000012469713#articleHeader9">ajax跨域，这应该是最全的解决方案了</a><br>
+[3] <a href="https://zhuanlan.zhihu.com/p/27290218">3分钟弄明白顶级域名|二级域名|子域名|父域名的区别</a><br>
+[4] <a href="https://developer.mozilla.org/zh-CN/docs/Web/Security/Same-origin_policy">浏览器的同源策略</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://zeuscoder.github.io/2019/06/12/web-cors/" data-id="clvynbzpi001qazc99hz8egdn" class="article-share-link">
+        分享
+      </a>
+      
+    </footer>
+
+  </div>
+
+  
+  
+<nav class="article-nav">
+  
+  <a href="/2019/06/13/event-loop/" class="article-nav-link">
+    <strong class="article-nav-caption">前一篇</strong>
+    <div class="article-nav-title">
+      
+      WEB：Event Loop 的样子
+      
+    </div>
+  </a>
+  
+  
+  <a href="/2019/06/09/web-module/" class="article-nav-link">
+    <strong class="article-nav-caption">后一篇</strong>
+    <div class="article-nav-title">WEB：浅谈前端模块化</div>
+  </a>
+  
+</nav>
+
+  
+
+  
+  
+  
+  
+
+</article>
+</section>
+    <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+  <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+  <li><i class="fe fe-bookmark"></i> <span id="busuanzi_value_page_pv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>zeus の blog &copy; 2024</li>
+      
+        <li></li>
+      
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>theme  <a href="https://github.com/zhwangart/hexo-theme-ocean">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+  </main>
+  <aside class="sidebar">
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/zeus.png" alt="zeus の blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/gallery">相册</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="搜索">
+        <i class="fe fe-search"></i>
+        搜索
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="fe fe-feed"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+
+<script src="/js/wrapImage.js"></script>
+
+
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/copybtn.js"></script>
+
+
+
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+  });
+</script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+</body>
+
+</html>

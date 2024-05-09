@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="description" content="穷则独善其身">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    HTTP：HTTP缓存的那些事 |
+    
+    zeus の blog</title>
+  
+  <link rel="shortcut icon" href="/zeus.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+<body>
+  <main class="content">
+    <section class="outer">
+  <article id="post-http-cache" class="article article-type-post" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+      
+
+<h1 class="article-title" itemprop="name">
+  HTTP：HTTP缓存的那些事
+</h1>
+
+
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2017/06/30/http-cache/" class="article-date">
+  <time datetime="2017-06-30T15:46:29.000Z" itemprop="datePublished">2017-06-30</time>
+</a>
+      
+<div class="article-category">
+  <a class="article-category-link" href="/categories/web/">web</a>
+</div>
+
+    </div>
+    
+
+    
+    
+<div class="tocbot"></div>
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+      
+      <blockquote>
+<p>重用已经获取的资源能够有效的提升网站与应用的性能。Web 缓存能够减少延迟与网络阻塞，进而减少显示某个资源所用的时间。借助 HTTP 缓存，Web 站点变得更具有响应性。</p>
+</blockquote>
+<p>引用自 <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Caching_FAQ">MDN</a> 的一段话。</p>
+<span id="more"></span>
+
+<hr>
+<p>划重点：1.0 的 <code>Expires</code>、1.1 的 <code>Cache-Control</code> 和协商缓存的两对<code>[Etag, If-None-Match]</code>、<code>[Last-Modified, If-Modified-Since]</code></p>
+<hr>
+<h2 id="HTTP缓存"><a href="#HTTP缓存" class="headerlink" title="HTTP缓存"></a>HTTP缓存</h2><p>缓存：① 是指<strong>代理服务器（from http）</strong> 或 <strong>客户端本地磁盘（from memory）</strong> 内保存的资源副本（拷贝），并在下次请求该资源时提供该资源副本的__技术__。② 当 web 缓存发现请求的资源已经被存储，它会拦截请求，返回该资源的拷贝，而不会去源服务器重新下载。</p>
+<p>作用：利用缓存可减少对源服务器的访问，因此节省了通信流量和通信时间。</p>
+<p>那问题来了：</p>
+<ul>
+<li>缓存的目标是什么?</li>
+<li>缓存的方法有哪些？</li>
+</ul>
+<h2 id="HTTP报文"><a href="#HTTP报文" class="headerlink" title="HTTP报文"></a>HTTP报文</h2><p>小插曲：在下一步介绍HTTP缓存之前，先做一下知识铺垫，简单介绍下HTTP报文。</p>
+<h3 id="报文概念"><a href="#报文概念" class="headerlink" title="报文概念"></a>报文概念</h3><p>HTTP报文就是浏览器和服务器间通信时发送及响应的数据块。</p>
+<h3 id="报文分类"><a href="#报文分类" class="headerlink" title="报文分类"></a>报文分类</h3><p>浏览器向服务器请求数据，发送请求（request）报文；</p>
+<p>服务器向浏览器返回数据，返回响应（response）报文。</p>
+<h3 id="报文构成"><a href="#报文构成" class="headerlink" title="报文构成"></a>报文构成</h3><p>报文信息主要分为两部分：</p>
+<p>1 Header：包含属性的__首部__，附加信息（cookie，缓存信息）与缓存相关的规则信息，均包含在header中。</p>
+<p>2 Body：包含数据的__主体__，HTTP请求真正想要传输的部分。</p>
+<p>小总结：缓存的内容是主体，缓存的方法在首部。</p>
+<h2 id="缓存操作的目标"><a href="#缓存操作的目标" class="headerlink" title="缓存操作的目标"></a>缓存操作的目标</h2><p>常见的HTTP缓存只能存储GET响应，缓存的关键主要包括 request method 和目标URI。</p>
+<p>普遍的缓存案例：</p>
+<ul>
+<li>一个检索请求的成功响应: 状态码：200，一个包含例如HTML文档，图片，或者文件的响应</li>
+<li>不变的重定向: 响应状态码：301</li>
+<li>错误响应: 响应状态码：404 的一个页面</li>
+<li>不完全的响应: 响应状态码 206，只返回局部的信息</li>
+<li>除了 GET 请求外，如果匹配到作为一个已被定义的cache键名的响应</li>
+</ul>
+<h2 id="缓存策略分类"><a href="#缓存策略分类" class="headerlink" title="缓存策略分类"></a>缓存策略分类</h2><p>在讲述如何控制缓存之前，先看看缓存策略大致有哪些类型。在已存在缓存数据的前提下，根据是否需要重新向服务器发起请求分类，这里主要分为__强制缓存__和__对比缓存__两大类。</p>
+<h3 id="强制缓存"><a href="#强制缓存" class="headerlink" title="强制缓存"></a>强制缓存</h3><p>强制缓存：如果缓存生效，则不需要再与服务器发生交互。</p>
+<p><img src="/images/http-cache/cache-force.png" alt="cache-force"></p>
+<h3 id="对比缓存"><a href="#对比缓存" class="headerlink" title="对比缓存"></a>对比缓存</h3><p>对比缓存：不管缓存是否生效，都需要与服务端发生交互。</p>
+<p><img src="/images/http-cache/cache-compair.png" alt="cache-compair"></p>
+<p>服务端在进行标识比较后，只返回header部分，通过状态码告知客户端使用缓存，不需要将报文主体部分返回客户端。</p>
+<p>小总结：两类缓存规则可以同时存在，强制缓存优先级高于对比缓存，也就是说，当执行强制缓存的规则时，如果缓存生效，直接使用缓存，不再执行对比缓存规则。</p>
+<h2 id="缓存控制策略"><a href="#缓存控制策略" class="headerlink" title="缓存控制策略"></a>缓存控制策略</h2><p>关键词：<code>Cache-Control</code> <code>Last-Modified|If-Modified-Since</code> <code>Etag|If-None-Match</code></p>
+<h3 id="Cache-Control头"><a href="#Cache-Control头" class="headerlink" title="Cache-Control头"></a>Cache-Control头</h3><p>HTTP&#x2F;1.1定义的 Cache-Control 头用来区分对缓存机制的支持情况，请求头和响应头都支持这个属性。通过它提供的不同的值来定义缓存策略。</p>
+<p><span style="color: red">注意：在__请求__和__响应__报文的首部都支持 Cache-Control ，要学会区分 Cache-Control 的缓存策略是定义在请求还是响应。</span></p>
+<p><img src="/images/http-cache/cache-control-request.png" alt="cache-control-request"></p>
+<p><img src="/images/http-cache/cache-control-response.png" alt="cache-control-response"></p>
+<h4 id="控制可执行缓存的对象的指令"><a href="#控制可执行缓存的对象的指令" class="headerlink" title="控制可执行缓存的对象的指令"></a>控制可执行缓存的对象的指令</h4><h5 id="no-store指令（请求-响应）"><a href="#no-store指令（请求-响应）" class="headerlink" title="no-store指令（请求&amp;响应）"></a>no-store指令（请求&amp;响应）</h5><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Cache</span>-<span class="title class_">Control</span>：no-store</span><br></pre></td></tr></table></figure>
+
+<p>完全不支持缓存，所有内容不得缓存。一旦开启，强制缓存和对比缓存都不会生效。</p>
+<h4 id="表示是否能缓存的指令"><a href="#表示是否能缓存的指令" class="headerlink" title="表示是否能缓存的指令"></a>表示是否能缓存的指令</h4><h5 id="public指令（响应）"><a href="#public指令（响应）" class="headerlink" title="public指令（响应）"></a>public指令（响应）</h5><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Cache</span>-<span class="title class_">Control</span>：public</span><br></pre></td></tr></table></figure>
+
+<p>响应可以被任何请求来源缓存，客户端和服务器都可缓存。</p>
+<h5 id="private指令（响应）"><a href="#private指令（响应）" class="headerlink" title="private指令（响应）"></a>private指令（响应）</h5><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Cache</span>-<span class="title class_">Control</span>：private</span><br></pre></td></tr></table></figure>
+
+<p>响应只能被唯一的用户缓存，客户端可以缓存。</p>
+<h5 id="no-cache指令（请求-响应）—对比缓存"><a href="#no-cache指令（请求-响应）—对比缓存" class="headerlink" title="no-cache指令（请求&amp;响应）—对比缓存"></a>no-cache指令（请求&amp;响应）—对比缓存</h5><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Cache</span>-<span class="title class_">Control</span>：no-cache</span><br></pre></td></tr></table></figure>
+
+<p>在释放缓存服务器的缓存内容前向服务端源地址发送请求以验证缓存是否有效。使用 no-cache 指令的目的是为了防止从缓存中返回过期的资源。</p>
+<p>请求包含 no-cache：客户端将不会接收缓存过的响应，过程参照对比缓存。
+响应包含 no-cache：缓存服务器不能对资源进行缓存。</p>
+<h4 id="指定缓存期限和认证的指令"><a href="#指定缓存期限和认证的指令" class="headerlink" title="指定缓存期限和认证的指令"></a>指定缓存期限和认证的指令</h4><h5 id="max-age指令（请求-响应）—响应Date"><a href="#max-age指令（请求-响应）—响应Date" class="headerlink" title="max-age指令（请求&amp;响应）—响应Date"></a>max-age指令（请求&amp;响应）—响应Date</h5><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Cache</span>-<span class="title class_">Control</span>: max-age=<span class="number">604800</span> <span class="comment">// 一周</span></span><br></pre></td></tr></table></figure>
+
+<p>请求包含 max-age：缓存资源的缓存时间 &lt; max-age指定时间 ? 直接获取缓存资源 : 缓存服务器将请求转发给服务器。
+响应包含 max-age：响应的 must-revalidate 和 Expires 将失效，max-age指定时间 &#x3D; 资源缓存的期限。一旦超过时间，资源将从缓存服务器移除。</p>
+<h5 id="min-fresh指令（请求）"><a href="#min-fresh指令（请求）" class="headerlink" title="min-fresh指令（请求）"></a>min-fresh指令（请求）</h5><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Cache</span>-<span class="title class_">Control</span>: min-fresh=<span class="number">60</span> <span class="comment">// 一分钟</span></span><br></pre></td></tr></table></figure>
+
+<p>min-fresh指令：缓存资源的能缓存剩余时间(新鲜度) &gt; min-fresh指定时间 ? 直接获取缓存资源 : 缓存服务器将请求转发给服务器。</p>
+<h5 id="max-stale指令（请求）"><a href="#max-stale指令（请求）" class="headerlink" title="max-stale指令（请求）"></a>max-stale指令（请求）</h5><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Cache</span>-<span class="title class_">Control</span>: max-stale=<span class="number">60</span> <span class="comment">// 一分钟</span></span><br></pre></td></tr></table></figure>
+
+<p>max-stale指令：缓存资源的过期时间 &lt; max-stale指定时间 ? 直接获取缓存资源 : 缓存服务器将请求转发给服务器。</p>
+<h5 id="only-if-cached指令（请求）"><a href="#only-if-cached指令（请求）" class="headerlink" title="only-if-cached指令（请求）"></a>only-if-cached指令（请求）</h5><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Cache</span>-<span class="title class_">Control</span>: only-<span class="keyword">if</span>-cached</span><br></pre></td></tr></table></figure>
+
+<p>only-if-cached指令：客户端仅在缓存服务器本地缓存目标资源的情况下才会要求返回。即缓存服务器有缓存就直接拿缓存，没缓存就访问源服务器。</p>
+<h5 id="must-revalidate指令（响应）—对比缓存"><a href="#must-revalidate指令（响应）—对比缓存" class="headerlink" title="must-revalidate指令（响应）—对比缓存"></a>must-revalidate指令（响应）—对比缓存</h5><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Cache</span>-<span class="title class_">Control</span>：must-revalidate</span><br></pre></td></tr></table></figure>
+
+<p>must-revalidate指令：代理会向源服务器再次验证即将返回的响应缓存目前是否仍然有效。同时会忽略请求的max-stale指令。</p>
+<h5 id="no-transform指令（请求-响应）"><a href="#no-transform指令（请求-响应）" class="headerlink" title="no-transform指令（请求&amp;响应）"></a>no-transform指令（请求&amp;响应）</h5><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Cache</span>-<span class="title class_">Control</span>: no-transform</span><br></pre></td></tr></table></figure>
+
+<p>no-transform指令：缓存都不能改变实体主体的媒体类型，防止缓存或代理压缩图片等类似操作。</p>
+<h3 id="对比缓存-1"><a href="#对比缓存-1" class="headerlink" title="对比缓存"></a>对比缓存</h3><h4 id="Last-Modified（响应）-If-Modified-Since（请求）"><a href="#Last-Modified（响应）-If-Modified-Since（请求）" class="headerlink" title="Last-Modified（响应）| If-Modified-Since（请求）"></a>Last-Modified（响应）| If-Modified-Since（请求）</h4><ol>
+<li>Last-Modified：服务器在响应请求时，告诉浏览器资源的最后修改时间。</li>
+<li>If-Modified-Since：上一次请求资源的修改时间。</li>
+<li>Last-Modified &gt; If-Modified-Since ? 200重新访问资源 : 304使用缓存资源</li>
+</ol>
+<h4 id="Etag（响应）-If-None-Match（请求）"><a href="#Etag（响应）-If-None-Match（请求）" class="headerlink" title="Etag（响应）| If-None-Match（请求）"></a>Etag（响应）| If-None-Match（请求）</h4><ol>
+<li>Etag：服务器响应请求时，告诉浏览器当前资源在服务器的唯一标识（生成规则由服务器决定）。</li>
+<li>If-None-Match：再次请求服务器时，通过此字段通知服务器客户段缓存数据的唯一标识。</li>
+<li>Etag &#x3D;&#x3D;&#x3D; If-None-Match ? 304使用缓存资源 : 200重新访问资源</li>
+</ol>
+<p><strong>缓存优先级</strong>：<code>Cache-Control</code> &gt; <code>Expires</code> &gt; <code>ETag</code> &gt; <code>Last-Modified</code></p>
+<h2 id="缓存决策指南"><a href="#缓存决策指南" class="headerlink" title="缓存决策指南"></a>缓存决策指南</h2><p>源自于 Chrome 官方给出的缓存决策建议：</p>
+<p><img src="/images/http-cache/cache-order.png" alt="cache-order"></p>
+<ul>
+<li>当资源内容不可以复用时，直接设置 <code>Cache-Control</code> 为 <code>no-store</code>，拒绝一切形式的缓存</li>
+<li>假如每次都需要向服务器进行缓存有效确认时，设置 <code>Cache-Control</code> 为 <code>no-cache</code></li>
+<li>考虑是否可以被代理服务器缓存，是的话设置为 <code>public</code>，否的话则设置为 <code>private</code></li>
+<li>然后考虑资源的过期时间：配置 <code>max-age</code> 、<code>Etag</code>、<code>Last-Modified</code> 等参数</li>
+</ul>
+<p>参考文章：</p>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Caching_FAQ">MDN HTTP缓存</a></p>
+<p><a href="https://book.douban.com/subject/25863515/">图解HTTP</a></p>
+<p><a href="http://www.cnblogs.com/chenqf/p/6386163.html">彻底弄懂HTTP缓存机制及原理</a></p>
+<p><a href="http://www.tuicool.com/articles/zUZnUre">彻底弄懂 HTTP 缓存机制</a></p>
+<p>掌握 HTTP 缓存——从请求到响应过程的一切（上）</p>
+<p>掌握 HTTP 缓存——从请求到响应过程的一切（下）</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://zeuscoder.github.io/2017/06/30/http-cache/" data-id="clvynbzox0010azc9c1ukbohv" class="article-share-link">
+        分享
+      </a>
+      
+<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/HTTP/" rel="tag">HTTP</a></li></ul>
+
+    </footer>
+
+  </div>
+
+  
+  
+<nav class="article-nav">
+  
+  <a href="/2018/05/01/web-countdown/" class="article-nav-link">
+    <strong class="article-nav-caption">前一篇</strong>
+    <div class="article-nav-title">
+      
+      JS：倒计时
+      
+    </div>
+  </a>
+  
+  
+  <a href="/2017/06/11/web-rest/" class="article-nav-link">
+    <strong class="article-nav-caption">后一篇</strong>
+    <div class="article-nav-title">WEB：我所理解的REST</div>
+  </a>
+  
+</nav>
+
+  
+
+  
+  
+  
+  
+
+</article>
+</section>
+    <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+  <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+  <li><i class="fe fe-bookmark"></i> <span id="busuanzi_value_page_pv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>zeus の blog &copy; 2024</li>
+      
+        <li></li>
+      
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>theme  <a href="https://github.com/zhwangart/hexo-theme-ocean">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+  </main>
+  <aside class="sidebar">
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/zeus.png" alt="zeus の blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/gallery">相册</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="搜索">
+        <i class="fe fe-search"></i>
+        搜索
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="fe fe-feed"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+
+<script src="/js/wrapImage.js"></script>
+
+
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/copybtn.js"></script>
+
+
+
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+  });
+</script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+</body>
+
+</html>

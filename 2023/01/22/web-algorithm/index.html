@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="description" content="穷则独善其身">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    WEB：算法的那些套路儿 |
+    
+    zeus の blog</title>
+  
+  <link rel="shortcut icon" href="/zeus.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+<body>
+  <main class="content">
+    <section class="outer">
+  <article id="post-web-algorithm" class="article article-type-post" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+      
+
+<h1 class="article-title" itemprop="name">
+  WEB：算法的那些套路儿
+</h1>
+
+
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2023/01/22/web-algorithm/" class="article-date">
+  <time datetime="2023-01-22T08:08:34.000Z" itemprop="datePublished">2023-01-22</time>
+</a>
+      
+    </div>
+    
+
+    
+    
+<div class="tocbot"></div>
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+      
+      <p>算法这回事，用则进，不用则废；学而时习之，共勉之。学习前端算法惯用的套路，以不变应万变，<strong>从难到易</strong>。</p>
+<span id="more"></span>
+
+<hr>
+<blockquote>
+<p>一句话总结：算法的本质就是「穷举」，而穷举有两个关键难点：<strong>无遗漏、无冗余</strong>。</p>
+</blockquote>
+<hr>
+<blockquote>
+<p>本文讲解题目全部来源于 <a href="https://leetcode.cn/problemset/">leetcode</a>，请根据题目序号查看题目内容。</p>
+</blockquote>
+<hr>
+<h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><p>数据结构的存储方式只有两种：<strong>数组（顺序存储）</strong> 和 <strong>链表（链式存储）</strong> ，其余可以先忽略不计。</p>
+<h3 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h3><p>数组（二维数组）的核心是<strong>初始化和遍历</strong>，以及很多常用的 API。</p>
+<p>数组初始化：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> arr = <span class="keyword">new</span> <span class="title class_">Array</span>()</span><br><span class="line"><span class="keyword">const</span> arr = <span class="keyword">new</span> <span class="title class_">Array</span>(<span class="number">8</span>)</span><br><span class="line"><span class="keyword">const</span> arr = (<span class="keyword">new</span> <span class="title class_">Array</span>(<span class="number">8</span>)).<span class="title function_">fill</span>(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> arr = []</span><br><span class="line"></span><br><span class="line"><span class="comment">// 二维数组</span></span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; arr.<span class="property">length</span>; i++) &#123;</span><br><span class="line">    arr[i] = []</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>数组遍历：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; arr.<span class="property">length</span>; i++) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(arr[i], i)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">arr.<span class="title function_">forEach</span>(<span class="function">(<span class="params">item, index</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(item, index)</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> newArr = arr.<span class="title function_">map</span>(<span class="function">(<span class="params">item, index</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(item, index)</span><br><span class="line">    <span class="keyword">return</span> item + <span class="number">1</span></span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>常用 API：<code>concat</code>、<code>some</code>、<code>slice</code>、<code>splice</code>、<code>join</code>、<code>sort</code>、<code>pop</code>、<code>push</code> 等等。</p>
+<h3 id="链表"><a href="#链表" class="headerlink" title="链表"></a>链表</h3><p>链表中，数据单位的名称叫做“结点”，而结点和结点的分布，在内存中可以是离散的。</p>
+<p>结点数据结构：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">ListNode</span>(<span class="params">val</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">val</span> = val;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">next</span> = <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>创建结点：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> node = <span class="keyword">new</span> <span class="title class_">ListNode</span>(<span class="number">1</span>)</span><br><span class="line">node.<span class="property">next</span> = <span class="keyword">new</span> <span class="title class_">ListNode</span>(<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+
+<p>插入结点：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 如果目标结点本来不存在，那么记得手动创建</span></span><br><span class="line"><span class="keyword">const</span> node3 = <span class="keyword">new</span> <span class="title class_">ListNode</span>(<span class="number">3</span>)</span><br><span class="line"><span class="comment">// 把node3的 next 指针指向 node2（即 node1.next）</span></span><br><span class="line">node3.<span class="property">next</span> = node1.<span class="property">next</span></span><br><span class="line"><span class="comment">// 把node1的 next 指针指向 node3</span></span><br><span class="line">node1.<span class="property">next</span> = node3</span><br></pre></td></tr></table></figure>
+
+<p>删除结点：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 利用 node1 可以定位到 node3</span></span><br><span class="line"><span class="keyword">const</span> target = node1.<span class="property">next</span></span><br><span class="line">node1.<span class="property">next</span> = target.<span class="property">next</span></span><br></pre></td></tr></table></figure>
+
+<p>&#x2F;&#x2F; TODO：分析下链表的几项基础类型题目</p>
+<p>环形链表基本问题——如何判断链表是否成环？</p>
+<h3 id="二叉树（演变结构）"><a href="#二叉树（演变结构）" class="headerlink" title="二叉树（演变结构）"></a>二叉树（演变结构）</h3><p>二叉树结点的构造函数：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">TreeNode</span>(<span class="params">val</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">val</span> = val;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">left</span> = <span class="variable language_">this</span>.<span class="property">right</span> = <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>二叉树问题的重中之重便是<strong>遍历</strong>及其相关的演变。先学会二叉树的各种遍历方式（四种）：</p>
+<ul>
+<li>前序遍历</li>
+<li>中序遍历</li>
+<li>后序遍历</li>
+<li>层次遍历</li>
+</ul>
+<p>前三种属于递归遍历，最后一种属于迭代遍历。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 所有遍历函数的入参都是树的根结点对象</span></span><br><span class="line"><span class="keyword">var</span> traverse = <span class="keyword">function</span>(<span class="params">root</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (root === <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 前序位置</span></span><br><span class="line">    <span class="comment">// console.log(&#x27;当前遍历的结点值是：&#x27;, root.val)</span></span><br><span class="line">    <span class="title function_">traverse</span>(root.<span class="property">left</span>);</span><br><span class="line">    <span class="comment">// 中序位置</span></span><br><span class="line">    <span class="title function_">traverse</span>(root.<span class="property">right</span>);</span><br><span class="line">    <span class="comment">// 后序位置</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>总结：这里指的前中后顺序，关键就在于 <strong>root.val</strong> 语句的处理位置。</p>
+<h2 id="方法论"><a href="#方法论" class="headerlink" title="方法论"></a>方法论</h2><h3 id="动态规划（Dynamic-Programming，DP）"><a href="#动态规划（Dynamic-Programming，DP）" class="headerlink" title="动态规划（Dynamic Programming，DP）"></a>动态规划（Dynamic Programming，DP）</h3><p>核心思想：</p>
+<ul>
+<li>动态规划问题的一般形式就是<strong>求最值</strong>，求解动态规划的核心问题是<strong>穷举</strong>。因为要求最值，肯定要把所有可行的答案穷举出来，然后在其中找最值。</li>
+</ul>
+<p>问题特点：</p>
+<ul>
+<li><strong>只要求</strong> 给出达成某个目的的 <strong><code>解法个数或最终答案</code></strong></li>
+<li><strong>不要求</strong> 给出每一种解法对应的 <strong><code>具体路径</code></strong></li>
+</ul>
+<p>关键特征（三要素）：</p>
+<ul>
+<li>具备【最优子结构】：能够通过子问题的最值得到原问题的最值</li>
+<li>存在【重叠子问题】</li>
+<li>列出 【状态转移方程】</li>
+</ul>
+<p>解答技巧：</p>
+<ul>
+<li><strong>明确 base case</strong>（很关键的一步）</li>
+<li>明确【状态】</li>
+<li>明确【选择】</li>
+<li>定义 <strong>dp</strong> 数组&#x2F;函数的含义</li>
+</ul>
+<p>套路框架：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>典例分析：</p>
+<ul>
+<li>P509 【斐波那契数列】</li>
+</ul>
+<p>一、暴力递归</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> fib = <span class="keyword">function</span>(<span class="params">n</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (n === <span class="number">1</span> || n === <span class="number">2</span>) <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="title function_">fib</span>(n - <span class="number">1</span>) + <span class="title function_">fib</span>(n - <span class="number">2</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>缺点：每求一个中间值都会存在大量重复计算，这就是存在了 <strong>【重叠子问题】</strong> 。</p>
+<p>二、带备忘录的递归解法</p>
+<p>在动态规划中，常常会遇到子问题的重复计算。DP table （通常是一个数组）的主要作用是在求解过程中保存已解决的子问题的结果，以便在后续的计算中直接使用，从而避免了重复计算，提高了算法的效率。</p>
+<blockquote>
+<p>请注意，这里 table 长度为 n + 1，而 table[0] 一般不用。</p>
+</blockquote>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> fib = <span class="keyword">function</span>(<span class="params">n</span>) &#123;</span><br><span class="line">    <span class="comment">// 备忘录全初始化为 0</span></span><br><span class="line">    <span class="keyword">const</span> memo = <span class="keyword">new</span> <span class="title class_">Array</span>(n + <span class="number">1</span>).<span class="title function_">fill</span>(<span class="number">0</span>);</span><br><span class="line">    <span class="comment">// 进行带备忘录的递归</span></span><br><span class="line">    <span class="keyword">return</span> <span class="title function_">dp</span>(memo, n);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 带着备忘录进行递归</span></span><br><span class="line"><span class="keyword">var</span> dp = <span class="keyword">function</span>(<span class="params">memo, n</span>) &#123;</span><br><span class="line">    <span class="comment">// base case</span></span><br><span class="line">    <span class="keyword">if</span> (n == <span class="number">0</span> || n == <span class="number">1</span>) <span class="keyword">return</span> n;</span><br><span class="line">    <span class="comment">// 已经计算过，不用再计算了</span></span><br><span class="line">    <span class="keyword">if</span> (memo[n] != <span class="number">0</span>) <span class="keyword">return</span> memo[n];</span><br><span class="line">    memo[n] = <span class="title function_">dp</span>(memo, n - <span class="number">1</span>) + <span class="title function_">dp</span>(memo, n - <span class="number">2</span>);</span><br><span class="line">    <span class="keyword">return</span> memo[n];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/web-algorithm/numbers.png" alt="状态转移方程"></p>
+<p>三、dp 数组的迭代（递推）解法</p>
+<p>请注意：这次的解法是【自底向上】的，而前面两种是【自顶向下】的。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> fib = <span class="keyword">function</span>(<span class="params">N</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (N === <span class="number">0</span>) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">const</span> dp = <span class="keyword">new</span> <span class="title class_">Array</span>(N + <span class="number">1</span>).<span class="title function_">fill</span>(<span class="number">0</span>);</span><br><span class="line">    <span class="comment">// base case</span></span><br><span class="line">    dp[<span class="number">0</span>] = <span class="number">0</span>; dp[<span class="number">1</span>] = <span class="number">1</span>;</span><br><span class="line">    <span class="comment">// 状态转移</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">2</span>; i &lt;= N; i++) &#123;</span><br><span class="line">        dp[i] = dp[i - <span class="number">1</span>] + dp[i - <span class="number">2</span>];</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dp[N];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>P322 【零钱兑换】</li>
+</ul>
+<p>TODO: 描述解题技巧</p>
+<p><img src="/images/web-algorithm/coins.png" alt="状态转移方程"></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 定义：要凑出金额 n，至少要 dp(coins, n) 个硬币</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">coinChange</span>(<span class="params">coins, amount</span>) &#123;</span><br><span class="line">    <span class="comment">// base case</span></span><br><span class="line">    <span class="keyword">if</span> (amount == <span class="number">0</span>) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">if</span> (amount &lt; <span class="number">0</span>) <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> res = <span class="title class_">Infinity</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> coin <span class="keyword">of</span> coins) &#123;</span><br><span class="line">        <span class="comment">// 计算子问题的结果</span></span><br><span class="line">        <span class="keyword">let</span> subProblem = <span class="title function_">coinChange</span>(coins, amount - coin);</span><br><span class="line">        <span class="comment">// 子问题无解则跳过</span></span><br><span class="line">        <span class="keyword">if</span> (subProblem == -<span class="number">1</span>) <span class="keyword">continue</span>;</span><br><span class="line">        <span class="comment">// 在子问题中选择最优解，然后加一</span></span><br><span class="line">        res = <span class="title class_">Math</span>.<span class="title function_">min</span>(res, subProblem + <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> res == <span class="title class_">Infinity</span> ? -<span class="number">1</span> : res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>个人体验来说，我更喜欢自底向上的迭代算法，更直观，更容易理解。</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> coinChange = <span class="keyword">function</span>(<span class="params">coins, amount</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> dp = <span class="keyword">new</span> <span class="title class_">Array</span>(amount + <span class="number">1</span>).<span class="title function_">fill</span>(amount + <span class="number">1</span>);</span><br><span class="line">     <span class="comment">// The size of the array is amount + 1, and the initial value is also amount + 1</span></span><br><span class="line">    <span class="comment">//  dp[i] represents the minimum number of coins needed for the amount i</span></span><br><span class="line">    dp[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">// The outer loop is traversing all the values of all states</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; dp.<span class="property">length</span>; i++) &#123;</span><br><span class="line">        <span class="comment">// The inner loop is to find the minimum value of all choices</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">var</span> coin <span class="keyword">of</span> coins) &#123;</span><br><span class="line">            <span class="comment">// Sub-problems are unsolvable, skip</span></span><br><span class="line">            <span class="keyword">if</span> (i - coin &lt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            dp[i] = <span class="title class_">Math</span>.<span class="title function_">min</span>(dp[i], <span class="number">1</span> + dp[i - coin]);</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> (dp[amount] == amount + <span class="number">1</span>) ? -<span class="number">1</span> : dp[amount];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>相关问题：
+<a href="https://leetcode-cn.com/problems/climbing-stairs/description/">70.排楼梯</a>
+<a href="https://leetcode-cn.com/problems/house-robber/descrip+tion/">198. 打家劫舍</a></p>
+<h4 id="0-1-背包模型（动态规划升级版）"><a href="#0-1-背包模型（动态规划升级版）" class="headerlink" title="0-1 背包模型（动态规划升级版）"></a>0-1 背包模型（动态规划升级版）</h4><p>DP table 通常是一个数组，但在背包问题中，需要升级为二维数组，并求出对应二维下标的目标值是多少。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">int[][] dp[N+<span class="number">1</span>][W+<span class="number">1</span>]</span><br><span class="line">dp[<span class="number">0</span>][..] = <span class="number">0</span></span><br><span class="line">dp[..][<span class="number">0</span>] = <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> [<span class="number">1.</span>.<span class="property">N</span>]:</span><br><span class="line">    <span class="keyword">for</span> w <span class="keyword">in</span> [<span class="number">1.</span>.<span class="property">W</span>]:</span><br><span class="line">        dp[i][w] = <span class="title function_">max</span>(</span><br><span class="line">            把物品 i 装进背包,</span><br><span class="line">            不把物品 i 装进背包</span><br><span class="line">        )</span><br><span class="line"><span class="keyword">return</span> dp[N][W]</span><br></pre></td></tr></table></figure>
+
+<h3 id="回溯算法（backtrack）"><a href="#回溯算法（backtrack）" class="headerlink" title="回溯算法（backtrack）"></a>回溯算法（backtrack）</h3><p>应用场景：排列、组合、子集问题。</p>
+<p>套路框架：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> backtrack = <span class="keyword">function</span>(<span class="params">root</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (root == <span class="literal">null</span>) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; root.<span class="property">children</span>.<span class="property">length</span>; i++) &#123;</span><br><span class="line">    <span class="keyword">var</span> child = root.<span class="property">children</span>[i];</span><br><span class="line">    <span class="comment">// 做选择</span></span><br><span class="line">    <span class="title function_">printf</span>(<span class="string">&quot;从 &quot;</span> + root + <span class="string">&quot; 到 &quot;</span> + child);</span><br><span class="line">    <span class="title function_">backtrack</span>(child);</span><br><span class="line">    <span class="comment">// 撤销选择</span></span><br><span class="line">    <span class="title function_">printf</span>(<span class="string">&quot;从 &quot;</span> + child + <span class="string">&quot; 到 &quot;</span> + root);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><span style="color: red">牢记，核心中的核心：前序位置（的代码）是进入一个节点的时候，后序位置（的代码）是离开一个节点的时候！！！</span></p>
+<h3 id="BFS（广度优先搜素）"><a href="#BFS（广度优先搜素）" class="headerlink" title="BFS（广度优先搜素）"></a>BFS（广度优先搜素）</h3><p>BFS 算法都是用<strong>队列</strong>这种数据结构，每次将一个节点周围的所有节点加入队列。
+每次把下一行的所有节点先存放在队列中，放到下一次轮询来遍历，以此类推。</p>
+<p>套路框架：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">BFS</span>(<span class="params">root</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> queue = [] <span class="comment">// 初始化队列queue</span></span><br><span class="line">    <span class="comment">// 根结点首先入队</span></span><br><span class="line">    queue.<span class="title function_">push</span>(root)</span><br><span class="line">    <span class="comment">// 队列不为空，说明没有遍历完全</span></span><br><span class="line">    <span class="keyword">while</span>(queue.<span class="property">length</span>) &#123;</span><br><span class="line">        <span class="keyword">const</span> top = queue[<span class="number">0</span>] <span class="comment">// 取出队头元素</span></span><br><span class="line">        <span class="comment">// 访问 top</span></span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(top.<span class="property">val</span>)</span><br><span class="line">        <span class="comment">// 如果左子树存在，左子树入队</span></span><br><span class="line">        <span class="keyword">if</span>(top.<span class="property">left</span>) &#123;</span><br><span class="line">            queue.<span class="title function_">push</span>(top.<span class="property">left</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 如果右子树存在，右子树入队</span></span><br><span class="line">        <span class="keyword">if</span>(top.<span class="property">right</span>) &#123;</span><br><span class="line">            queue.<span class="title function_">push</span>(top.<span class="property">right</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        queue.<span class="title function_">shift</span>() <span class="comment">// 访问完毕，队头元素出队</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p> 111 题「二叉树的最小深度」</p>
+<h3 id="二分搜索"><a href="#二分搜索" class="headerlink" title="二分搜索"></a>二分搜索</h3><p>适用数据类型：有序数组。</p>
+<h3 id="双指针"><a href="#双指针" class="headerlink" title="双指针"></a>双指针</h3><p>适用类型：数组、链表、字符串。</p>
+<p>双指针分两种类型：__快慢指针和左右指针（对撞指针）__。</p>
+<h4 id="滑动窗口（快慢指针）"><a href="#滑动窗口（快慢指针）" class="headerlink" title="滑动窗口（快慢指针）"></a>滑动窗口（快慢指针）</h4><p>适用数据类型：字符串、数组。</p>
+<p>套路框架：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> left = <span class="number">0</span>, right = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">let</span> <span class="variable language_">window</span> = [];</span><br><span class="line"><span class="keyword">while</span> (left &lt; right &amp;&amp; right &lt; s.<span class="property">length</span>) &#123;</span><br><span class="line">    <span class="comment">// 增大窗口</span></span><br><span class="line">    <span class="variable language_">window</span>.<span class="title function_">add</span>(s[right]);</span><br><span class="line">    right++;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (<span class="variable language_">window</span> needs shrink) &#123;</span><br><span class="line">        <span class="comment">// 缩小窗口</span></span><br><span class="line">        <span class="variable language_">window</span>.<span class="title function_">remove</span>(s[left]);</span><br><span class="line">        left++;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运用滑动窗口算法，具体要回答下面几个问题：</p>
+<ol>
+<li>什么时候应该扩大窗口？</li>
+<li>什么时候应该缩小窗口？</li>
+<li>什么时候应该更新答案？</li>
+</ol>
+<h4 id="左右指针"><a href="#左右指针" class="headerlink" title="左右指针"></a>左右指针</h4><p>主要应用在<strong>数组和字符串</strong>上，因为该数据结构具备<strong>前后下标</strong>。</p>
+<p>关键字：<strong>有序</strong>和<strong>数组</strong>。</p>
+<p>相关问题：
+<a href="https://leetcode.cn/problems/two-sum/">1.两数之和</a>
+<a href="https://leetcode.cn/problems/3sum/description/">15. 三数之和</a></p>
+<h2 id="经验总结（重点浓缩版）"><a href="#经验总结（重点浓缩版）" class="headerlink" title="经验总结（重点浓缩版）"></a>经验总结（重点浓缩版）</h2><ol>
+<li>涉及链表操作、尤其是涉及结点删除的题目，建议大家写代码的时候直接把 dummy 节点（虚拟头节点）给用起来，建立好的编程习惯。</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> dummy = <span class="keyword">new</span> <span class="title class_">ListNode</span>()</span><br><span class="line"><span class="comment">// 这里的 head 是链表原有的第一个结点</span></span><br><span class="line">dummy.<span class="property">next</span> = head</span><br></pre></td></tr></table></figure>
+
+
+<ol start="2">
+<li>写算法题的小经验：如果有返回值，记得先写 return 。</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">dp</span> () &#123;</span><br><span class="line">    <span class="keyword">const</span> res = []</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>单链表常考的技巧就是双指针，特别出现【倒数】字眼（因为链表是不知道自身长度的）。</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> removeNthFromEnd = <span class="keyword">function</span>(<span class="params">head, n</span>) &#123;</span><br><span class="line">    <span class="comment">// 初始化 dummy 结点</span></span><br><span class="line">    <span class="keyword">const</span> dummy = <span class="keyword">new</span> <span class="title class_">ListNode</span>()</span><br><span class="line">    <span class="comment">// dummy指向头结点</span></span><br><span class="line">    dummy.<span class="property">next</span> = head</span><br><span class="line">    <span class="comment">// 初始化快慢指针，均指向dummy</span></span><br><span class="line">    <span class="keyword">let</span> fast = dummy</span><br><span class="line">    <span class="keyword">let</span> slow = dummy</span><br></pre></td></tr></table></figure>
+
+
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://zeuscoder.github.io/2023/01/22/web-algorithm/" data-id="clvynbzph001oazc9cgt95w26" class="article-share-link">
+        分享
+      </a>
+      
+    </footer>
+
+  </div>
+
+  
+  
+<nav class="article-nav">
+  
+  <a href="/2023/03/22/write-blog/" class="article-nav-link">
+    <strong class="article-nav-caption">前一篇</strong>
+    <div class="article-nav-title">
+      
+      随笔：论自己的博客风格
+      
+    </div>
+  </a>
+  
+  
+  <a href="/2022/04/19/web-study/" class="article-nav-link">
+    <strong class="article-nav-caption">后一篇</strong>
+    <div class="article-nav-title">WEB：前端学习网站指南</div>
+  </a>
+  
+</nav>
+
+  
+
+  
+  
+  
+  
+
+</article>
+</section>
+    <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+  <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+  <li><i class="fe fe-bookmark"></i> <span id="busuanzi_value_page_pv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>zeus の blog &copy; 2024</li>
+      
+        <li></li>
+      
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>theme  <a href="https://github.com/zhwangart/hexo-theme-ocean">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+  </main>
+  <aside class="sidebar">
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/zeus.png" alt="zeus の blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/gallery">相册</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="搜索">
+        <i class="fe fe-search"></i>
+        搜索
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="fe fe-feed"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+
+<script src="/js/wrapImage.js"></script>
+
+
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/copybtn.js"></script>
+
+
+
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+  });
+</script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+</body>
+
+</html>

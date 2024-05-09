@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="description" content="穷则独善其身">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    JS：浅析 mpvue |
+    
+    zeus の blog</title>
+  
+  <link rel="shortcut icon" href="/zeus.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+<body>
+  <main class="content">
+    <section class="outer">
+  <article id="post-js-mpvue" class="article article-type-post" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+      
+
+<h1 class="article-title" itemprop="name">
+  JS：浅析 mpvue
+</h1>
+
+
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2020/05/03/js-mpvue/" class="article-date">
+  <time datetime="2020-05-03T13:53:58.000Z" itemprop="datePublished">2020-05-03</time>
+</a>
+      
+    </div>
+    
+
+    
+    
+<div class="tocbot"></div>
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+      
+      <p><a href="https://github.com/Meituan-Dianping/mpvue">mpvue</a> 是一个使用 Vue.js 开发<strong>小程序</strong>的前端框架。框架基于 Vue.js 核心，mpvue 修改了 Vue.js 的 <code>runtime</code> 和 <code>compiler</code> 实现，使其可以运行在小程序环境中，从而为小程序开发引入了整套 Vue.js 开发体验。</p>
+<blockquote>
+<p>引用自 <a href="http://mpvue.com/">mpvue</a> 官网的介绍。</p>
+</blockquote>
+<span id="more"></span>
+
+<p>基于官方的解释，可以初步认为 mpvue 是：</p>
+<ul>
+<li>基于 Vue.js 源码修改，是小程序获得 Vue.js 的开发体验；</li>
+<li>修改 Vue.js 的 <code>runtime</code> 和 <code>compiler</code> 源码，兼容小程序环境。</li>
+</ul>
+<p>上述两点是全文的<strong>核心</strong>。</p>
+<p>关于 mpvue 的基础用法，请参考 <a href="http://mpvue.com/">mpvue</a> 官网，这里不再详细介绍。</p>
+<h3 id="构建流程"><a href="#构建流程" class="headerlink" title="构建流程"></a>构建流程</h3><p>首先 mpvue 借鉴了 Vue 的实现思路，实现了与其类似的生态：</p>
+<ul>
+<li>mpvue.js：mpvue 的小程序核心库；</li>
+<li>mpvue-quickstart：基于 Vue-CLI 2.0 的 mpvue 脚手架；</li>
+<li>mpvue-loader：实现自定义 .vue 文件的解析，将其解析为 wxml、wxss 和 js 文件。</li>
+</ul>
+<p>① 通过 <code>mpvue-quickstart</code> 快速构建 mpvue 项目：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vue init mpvue/mpvue-quickstart mpvue-project</span><br></pre></td></tr></table></figure>
+
+<p>② <code>mpvue</code> 通过 <code>webpack</code> 构建和 <code>mpvue-loader</code> 解析将 .vue 文件转化为小程序能够识别的 wxml、wxss 和 js 文件</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">test</span>: <span class="regexp">/\.vue$/</span>,</span><br><span class="line">    <span class="attr">loader</span>: <span class="string">&#x27;mpvue-loader&#x27;</span>,</span><br><span class="line">    <span class="attr">options</span>: vueLoaderConfig</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>mpvue-loader</code> 中，使用了 <code>mpvue-template-compiler</code> 对 .vue 文件中的 <code>template</code> 进行了解析。<code>mpvue-template-compiler</code> 是核心的解析逻辑，将 .vue 文件中的 <code>template</code> 解析为小程序 <code>wxml</code> 对应的字符串。</p>
+<h3 id="构建模式"><a href="#构建模式" class="headerlink" title="构建模式"></a>构建模式</h3><p>mpvue 的构建过程中分为 dev 模式和 build 模式：</p>
+<ul>
+<li>dev 模式：使用了 source-map 模式，增加了对文件的监听；</li>
+<li>build 模式：关闭了 source-map 模式，一次性构建，且压缩源码。</li>
+</ul>
+<p>在 dev 模式下，使用了 <code>webpack-dev-middleware-hard-disk</code> 进行文件修改的监听，每次对代码进行修改，都会触发 <code>webpack</code> 重新 <code>compiler</code>。</p>
+<h3 id="实例化"><a href="#实例化" class="headerlink" title="实例化"></a>实例化</h3><p>前置条件：<a href="https://zeuscoder.github.io/2019/07/23/js-vue/">浅析 Vue</a>。</p>
+<p>mpvue 的分析是从 <code>const app = new Vue(App)</code> 开始的。</p>
+<p>由于 mpvue 是基于 Vue.js 源码修改的，源码执行流程与 Vue.js 大致相同。Vue 的实例化从 <code>_init</code> 方法开始：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">initLifecycle</span>(vm);</span><br><span class="line"><span class="title function_">initEvents</span>(vm);</span><br><span class="line"><span class="title function_">initRender</span>(vm);</span><br><span class="line"><span class="title function_">callHook</span>(vm, <span class="string">&#x27;beforeCreate&#x27;</span>);</span><br><span class="line"><span class="title function_">initInjections</span>(vm); <span class="comment">// resolve injections before data/props</span></span><br><span class="line"><span class="title function_">initState</span>(vm);</span><br><span class="line"><span class="title function_">initProvide</span>(vm); <span class="comment">// resolve provide after data/props</span></span><br><span class="line"><span class="title function_">callHook</span>(vm, <span class="string">&#x27;created&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (vm.<span class="property">$options</span>.<span class="property">el</span>) &#123;</span><br><span class="line">    vm.$mount(vm.<span class="property">$options</span>.<span class="property">el</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>首先 <code>initRender</code> 函数中的 <code>vm.$createElement</code> 在小程序中并不生效，小程序渲染逻辑与 Web 不同，小程序通过 wxml 对界面进行渲染，可以忽略 <code>initRender</code> 函数。</li>
+<li>然后 <code>initState</code> 函数完成了 <code>props</code>、<code>methods</code>、<code>data</code>、<code>computed</code> 和 <code>watch</code> 5 个属性的初始化。</li>
+<li>最后在调用了 <code>beforeCreate</code> 和 <code>created</code> 生命回调函数，完成 Vue 实例化后，继续执行 <code>$mount</code> 方法。</li>
+</ol>
+<p>mpvue 的 <code>$mount</code> 方法定义在 <code>platform/mp/runtime/index.js</code> 中，<code>platform</code> 目录存放了区别 <code>mpvue</code>、<code>web</code> 和 <code>weex</code> 的 **<code>runtime</code> 和 <code>compiler</code>**。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// public mount method</span></span><br><span class="line"><span class="title class_">Vue</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">$mount</span> = <span class="keyword">function</span> (<span class="params">el, hydrating</span>) &#123;</span><br><span class="line">    <span class="comment">// 初始化小程序生命周期相关</span></span><br><span class="line">    <span class="keyword">const</span> options = <span class="variable language_">this</span>.<span class="property">$options</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (options &amp;&amp; (options.<span class="property">render</span> || options.<span class="property">mpType</span>)) &#123;</span><br><span class="line">        <span class="keyword">const</span> &#123; mpType = <span class="string">&#x27;page&#x27;</span> &#125; = options</span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">this</span>.<span class="title function_">_initMP</span>(mpType, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="title function_">mountComponent</span>(<span class="variable language_">this</span>, <span class="literal">undefined</span>, <span class="literal">undefined</span>)</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="title function_">mountComponent</span>(<span class="variable language_">this</span>, <span class="literal">undefined</span>, <span class="literal">undefined</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>$mount</code> 方法主要判断 <code>mpType</code> 的类型（默认值是 page），实例化 App 或 Page。mpvue 与 vue 的不同之处在于 mpvue 将不执行界面的更新行为，只负责更新数据，其更新行为都将交由小程序框架程序处理。</p>
+<p><code>_initMP</code> 方法位于 &#x2F;packages&#x2F;mpvue&#x2F;index.js 中：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">initMP</span> (mpType, next) &#123;</span><br><span class="line">    <span class="keyword">if</span> (mp.<span class="property">status</span>) &#123;</span><br><span class="line">        <span class="comment">// 处理子组件的小程序生命周期</span></span><br><span class="line">        <span class="keyword">if</span> (mpType === <span class="string">&#x27;app&#x27;</span>) &#123;</span><br><span class="line">            <span class="title function_">callHook$1</span>(<span class="variable language_">this</span>, <span class="string">&#x27;onLaunch&#x27;</span>, mp.<span class="property">appOptions</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="title function_">callHook$1</span>(<span class="variable language_">this</span>, <span class="string">&#x27;onLoad&#x27;</span>, mp.<span class="property">query</span>);</span><br><span class="line">            <span class="title function_">callHook$1</span>(<span class="variable language_">this</span>, <span class="string">&#x27;onReady&#x27;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="title function_">next</span>()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    mp.<span class="property">mpType</span> = mpType;</span><br><span class="line">    mp.<span class="property">status</span> = <span class="string">&#x27;register&#x27;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 简化</span></span><br><span class="line">    <span class="title function_">createMP</span>()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注：<code>MPPage</code> 源码位于 <code>test/mp/helpers/mp.runtime.js</code>。</p>
+<p><code>createMP</code> 方法调用 global 方法实例化 App 或 Page 对象，其中 global.App 和 global.Page 都继承自 <code>MPPage</code>。其构造函数会调用 <code>_initLifecycle</code> 函数，会分别执行 <code>onLaunch</code> 和 <code>onShow</code> 或 <code>onLoad</code>、<code>onReady</code> 和 <code>onShow</code> 回调函数，执行完毕后会调用传入的回调函数 <code>next</code>，也就是 <code>mountComponent</code>：</p>
+<blockquote>
+<p>BUG：首次初始化不执行 onShow 回调函数</p>
+</blockquote>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">mountComponent</span> (</span><br><span class="line">    <span class="attr">vm</span>: <span class="title class_">Component</span>,</span><br><span class="line">    <span class="attr">el</span>: ?<span class="title class_">Element</span>,</span><br><span class="line">    hydrating?: boolean</span><br><span class="line">): <span class="title class_">Component</span> &#123;</span><br><span class="line">    <span class="title function_">callHook</span>(vm, <span class="string">&#x27;beforeMount&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (process.<span class="property">env</span>.<span class="property">NODE_ENV</span> !== <span class="string">&#x27;production&#x27;</span> &amp;&amp; config.<span class="property">performance</span> &amp;&amp; mark) &#123;</span><br><span class="line">        updateComponent = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">        vm.<span class="title function_">_update</span>(vnode, hydrating)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        updateComponent = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">            vm.<span class="title function_">_update</span>(vm.<span class="title function_">_render</span>(), hydrating)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    vm.<span class="property">_watcher</span> = <span class="keyword">new</span> <span class="title class_">Watcher</span>(vm, updateComponent, noop)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (vm.<span class="property">$vnode</span> == <span class="literal">null</span>) &#123;</span><br><span class="line">        vm.<span class="property">_isMounted</span> = <span class="literal">true</span></span><br><span class="line">        <span class="title function_">callHook</span>(vm, <span class="string">&#x27;mounted&#x27;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> vm</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>mountComponent</code> 方法在执行 <code>beforeMount</code> 生命周期函数之后，紧接着会执行一个<strong>关键步骤</strong>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vm.<span class="property">_watcher</span> = <span class="keyword">new</span> <span class="title class_">Watcher</span>(vm, updateComponent, noop);</span><br></pre></td></tr></table></figure>
+
+<p><strong>mpvue 不依赖 Vue 进行渲染，但是依赖 Vue 完成响应式功能</strong>。实例化渲染 Watcher 后会调用 mounted 生命周期回调函数，一个组件对应一个 Watcher。</p>
+<p>整个 mpvue 的实例化和渲染过程完成。</p>
+<h3 id="响应式"><a href="#响应式" class="headerlink" title="响应式"></a>响应式</h3><p>响应式数据收集依赖的相关知识请参考：<a href="https://cn.vuejs.org/v2/guide/reactivity.html">深入响应式原理</a></p>
+<p>实例化渲染 Watcher 后，当赋值 data 时， mpvue 会调用 Dep 的 notify 方法实现界面更新。</p>
+<p>仔细分析 <code>_.initMp</code> 方法中对 Page 进行的初始化：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> app = <span class="variable language_">global</span>.<span class="title function_">getApp</span>();</span><br><span class="line"><span class="variable language_">global</span>.<span class="title class_">Page</span>(&#123;</span><br><span class="line">    <span class="attr">data</span>: &#123;</span><br><span class="line">        <span class="attr">$root</span>: &#123;&#125;</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 全局事件代理的方式</span></span><br><span class="line">    <span class="attr">handleProxy</span>: <span class="keyword">function</span> <span class="title function_">handleProxy</span> (e) &#123;</span><br><span class="line">        <span class="keyword">return</span> rootVueVM.$handleProxyWithVue(e)</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// mp lifecycle for vue</span></span><br><span class="line">    <span class="comment">// 生命周期函数--监听页面加载</span></span><br><span class="line">    <span class="attr">onLoad</span>: <span class="keyword">function</span> <span class="title function_">onLoad</span> (query) &#123;</span><br><span class="line">        mp.<span class="property">page</span> = <span class="variable language_">this</span>;</span><br><span class="line">        mp.<span class="property">query</span> = query;</span><br><span class="line">        mp.<span class="property">status</span> = <span class="string">&#x27;load&#x27;</span>;</span><br><span class="line">        <span class="title function_">getGlobalData</span>(app, rootVueVM);</span><br><span class="line">        <span class="title function_">callHook$1</span>(rootVueVM, <span class="string">&#x27;onLoad&#x27;</span>, query);</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 生命周期函数--监听页面显示</span></span><br><span class="line">    <span class="attr">onShow</span>: <span class="keyword">function</span> <span class="title function_">onShow</span> () &#123;</span><br><span class="line">        mp.<span class="property">page</span> = <span class="variable language_">this</span>;</span><br><span class="line">        mp.<span class="property">status</span> = <span class="string">&#x27;show&#x27;</span>;</span><br><span class="line">        <span class="title function_">callHook$1</span>(rootVueVM, <span class="string">&#x27;onShow&#x27;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 只有页面需要 setData</span></span><br><span class="line">        rootVueVM.$nextTick(<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">        rootVueVM.<span class="title function_">_initDataToMP</span>();</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 生命周期函数--监听页面初次渲染完成</span></span><br><span class="line">    <span class="attr">onReady</span>: <span class="keyword">function</span> <span class="title function_">onReady</span> () &#123;</span><br><span class="line">        mp.<span class="property">status</span> = <span class="string">&#x27;ready&#x27;</span>;</span><br><span class="line"></span><br><span class="line">        <span class="title function_">callHook$1</span>(rootVueVM, <span class="string">&#x27;onReady&#x27;</span>);</span><br><span class="line">        <span class="title function_">next</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>调用 <code>global.Page</code> 初始化 <code>Page</code> 对象，从而实现页面的初始化；</li>
+<li>初始化 Page 的 data 为 <code>$root</code>，且 <code>$root</code> 为空；</li>
+<li>定义了事件代理方法 <code>handleProxy</code>（重点）；</li>
+<li>依次定义了 Page 的所有生命周期回调函数，用 <code>callHook$1</code> 绑定 Vue 实例 options 对应的生命周期回调函数。</li>
+</ul>
+<p>且在 onReady 函数调用完毕后，会调用 next 回调函数，即 mountComponent 函数。</p>
+<p>上面提到了 data 中 $root 的值为空，其中 mountComponent 函数会将完成 mpvue 实例中的 data 与 Page 中的 data 的映射：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">mountComponent</span> (vm, el,hydrating) &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">var</span> updateComponent = <span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">        vm.<span class="title function_">_update</span>(vm.<span class="title function_">_render</span>(), hydrating);</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    vm.<span class="property">_watcher</span> = <span class="keyword">new</span> <span class="title class_">Watcher</span>(vm, updateComponent, noop);</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">return</span> vm</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>Watcher</code> 的逻辑不做详细描述。集中精神分析 mpvue 的核心 <code>updateComponent</code>。首先执行 <code>vm._render</code> 函数生成 vnode，然后调用 <code>vm._update</code> 完成界面渲染。小程序界面渲染由小程序处理，与 mpvue 没有关联，直接关注 vm._update 方法：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Vue</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">_update</span> = <span class="keyword">function</span> (<span class="params">vnode, hydrating</span>) &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    vm.<span class="title function_">__patch__</span>(prevVnode, vnode)</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>vm.__patch__</code> 方法进行 <strong>diff</strong> 算法，找出差异项进行最小颗粒度的更新：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// src/platforms/mp/runtime/patch.js</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">patch</span> () &#123;</span><br><span class="line">    corePatch.<span class="title function_">apply</span>(<span class="variable language_">this</span>, <span class="variable language_">arguments</span>)</span><br><span class="line">    <span class="variable language_">this</span>.$updateDataToMP()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们可以忽略一切与界面渲染相关的代码 <code>corePatch</code>。因为 mpvue 实际做的，是监听 data 的变化，当 mpvue 实例的 data 变化时，调用 setData 方法对小程序界面进行更新：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// packages/mpvue/index.js</span></span><br><span class="line"><span class="comment">// 优化js变量动态变化时候引起全量更新</span></span><br><span class="line"><span class="comment">// 优化每次 setData 都传递大量新数据</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">updateDataToMP</span> () &#123;</span><br><span class="line">  <span class="keyword">var</span> page = <span class="title function_">getPage</span>(<span class="variable language_">this</span>);</span><br><span class="line">  <span class="keyword">if</span> (!page) &#123;</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> data = <span class="title function_">formatVmData</span>(<span class="variable language_">this</span>);</span><br><span class="line">  <span class="title function_">diffData</span>(<span class="variable language_">this</span>, data);</span><br><span class="line">  <span class="title function_">throttleSetData</span>(page.<span class="property">setData</span>.<span class="title function_">bind</span>(page), data);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>formatVmData 方法初始化 page 实例下的 data 对象，包含 props、computed 的数据；</li>
+<li>diffData 将 mpvue 实例下的 data 对象与 page 实例下的 data 对象进行对比，如果不一致则进行更新；</li>
+<li>最后通过 throttleSetData 方法调用 page.setData 完成对界面的渲染和更新，throttleSetData 方法主要优化了频繁调用 setData 的场景，限制了 setData 的调用间隔为 50ms，因为频繁调用 setData 会造成页面的卡顿，所以 mpvue 对此进行了优化。</li>
+</ul>
+<h3 id="事件代理"><a href="#事件代理" class="headerlink" title="事件代理"></a>事件代理</h3><p>mpvue 通过全局事件代理 <strong><code>handleProxy</code></strong> 的方式，实现事件的响应，事件响应过程中，通过 view 的 data 中的 eventid 和 comkey 区分事件和组件。</p>
+<p>打包后的文件：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- wxml --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">view</span> <span class="attr">bindtap</span>=<span class="string">&quot;handleProxy&quot;</span> <span class="attr">data-eventid</span>=<span class="string">&quot;&#123;&#123;&#x27;3&#x27;&#125;&#125;&quot;</span> <span class="attr">data-comkey</span>=<span class="string">&quot;&#123;&#123;$k&#125;&#125;&quot;</span> <span class="attr">class</span>=<span class="string">&quot;_div data-v-4cf53cc1&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">view</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在 <code>this._initMp</code> 方法中，完成了上述打包文件 data 的注入：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">global</span>.<span class="title class_">Page</span>(&#123;</span><br><span class="line">  <span class="attr">data</span>: &#123;</span><br><span class="line">    <span class="attr">$root</span>: &#123;&#125;</span><br><span class="line">  &#125;,</span><br><span class="line"></span><br><span class="line">  <span class="attr">handleProxy</span>: <span class="keyword">function</span> <span class="title function_">handleProxy</span> (e) &#123;</span><br><span class="line">    <span class="keyword">return</span> rootVueVM.$handleProxyWithVue(e)</span><br><span class="line">  &#125;,</span><br><span class="line"></span><br><span class="line">  <span class="attr">onShow</span>: <span class="keyword">function</span> <span class="title function_">onShow</span> () &#123;</span><br><span class="line">    mp.<span class="property">page</span> = <span class="variable language_">this</span>;</span><br><span class="line">    mp.<span class="property">status</span> = <span class="string">&#x27;show&#x27;</span>;</span><br><span class="line">    <span class="title function_">callHook$1</span>(rootVueVM, <span class="string">&#x27;onShow&#x27;</span>);</span><br><span class="line"></span><br><span class="line">    rootVueVM.$nextTick(<span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line">      rootVueVM.<span class="title function_">_initDataToMP</span>();</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>定义了 data 只包含一个 $root 属性，该属性为空对象；</li>
+<li>定义了 handleProxy 函数，即事件代理；</li>
+<li>通过 <code>rootVueVM._initDataToMP</code> 方法实现了 data 的注入。</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">initDataToMP</span> () &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">var</span> data = <span class="title function_">collectVmData</span>(<span class="variable language_">this</span>.<span class="property">$root</span>);</span><br><span class="line">    page.<span class="title function_">setData</span>(data);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">collectVmData</span> (vm, res) &#123;</span><br><span class="line">    <span class="keyword">if</span> ( res === <span class="keyword">void</span> <span class="number">0</span> ) res = &#123;&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> vms = vm.<span class="property">$children</span>;</span><br><span class="line">    <span class="keyword">if</span> (vms &amp;&amp; vms.<span class="property">length</span>) &#123;</span><br><span class="line">        vms.<span class="title function_">forEach</span>(<span class="keyword">function</span> (<span class="params">v</span>) &#123; <span class="keyword">return</span> <span class="title function_">collectVmData</span>(v, res); &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="title class_">Object</span>.<span class="title function_">assign</span>(res, <span class="title function_">formatVmData</span>(vm))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最终 initDataToMP 生成的 data 数据格式：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$root<span class="number">.0</span>: &#123;</span><br><span class="line">    <span class="attr">$k</span>: <span class="string">&quot;0&quot;</span></span><br><span class="line">    <span class="attr">$kk</span>: <span class="string">&quot;0_&quot;</span></span><br><span class="line">    <span class="attr">$p</span>: <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="attr">message</span>: <span class="string">&quot;Hello&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>$k 即组件的 comkey，$kk 为父组件的前缀，$p 这里没有用到，所以为空。获得 data 之后，mpvue 调用 page.setData(data) 完成 data 的注入。</p>
+<p>事件代理：每个 page 实例只会绑定一个 handleProxy 方法，核心实现：</p>
+<ul>
+<li>通过 event 获取 comkey，通过 comkey 获取对应的 mpvue 页面或组件实例；</li>
+<li>通过 event 获取 eventid，通过 eventid 获取对应的事件处理方法；</li>
+<li>执行方法时会传入一个 event 对象，该 event 对象为 mpvue 额外包装的，包装的方法为：getWebEventByMP。</li>
+</ul>
+<h3 id="mpvue-loader"><a href="#mpvue-loader" class="headerlink" title="mpvue-loader"></a>mpvue-loader</h3><p>前置条件：<a href="https://zeuscoder.github.io/2020/03/08/web-webpack/">webpack</a>。</p>
+<p>mpvue 框架从运行环境来分，可以分为运行时和构建时。mpvue 运行时指 mpvue 编写的小程序在运行时的环境；<strong>运行前需要将 .vue 编写的 mpvue 源码编译为小程序源码，其通过 webpack 进行构建的过程，被称为 mpvue 构建时</strong>。</p>
+<p>构建时最关键的一个步骤是将 .vue 源码编译为小程序源码。.vue 文件是 Vue.js 自定义的文件类型，符合 <a href="https://vue-loader.vuejs.org/zh/spec.html#%E7%AE%80%E4%BB%8B">SFC</a> 规范。</p>
+<p>通过对比 mpvue 和 vue 的 SFC 规范，得出 mpvue 构建时的<strong>主要改动</strong>：</p>
+<ul>
+<li>修改 vue-loader 为 mpvue-loader：<ul>
+<li>template 导出为小程序布局文件 wxml</li>
+<li>style 导出为小程序样式文件 wxss</li>
+</ul>
+</li>
+<li>修改 vue-template-compiler 为 mpvue-template-compiler，编译 mpvue 的 template。</li>
+</ul>
+<p>首先通过观察 mpvue-loader 构建 .vue 文件后输出的结果，分析可以较为直观。</p>
+<p>构建前的 .vue 文件：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">template</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span>&gt;</span>&#123;&#123;message&#125;&#125;<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">template</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span></span><br><span class="line"><span class="language-javascript">    data () &#123;</span></span><br><span class="line"><span class="language-javascript">        <span class="keyword">return</span> &#123;</span></span><br><span class="line"><span class="language-javascript">            <span class="attr">message</span>: <span class="string">&#x27;Hello World&#x27;</span></span></span><br><span class="line"><span class="language-javascript">        &#125;</span></span><br><span class="line"><span class="language-javascript">    &#125;</span></span><br><span class="line"><span class="language-javascript">&#125;</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">style</span> <span class="attr">scoped</span>&gt;</span><span class="language-css"></span></span><br><span class="line"><span class="language-css"><span class="selector-tag">div</span> &#123;</span></span><br><span class="line"><span class="language-css">    <span class="attribute">color</span>: red;</span></span><br><span class="line"><span class="language-css">&#125;</span></span><br><span class="line"><span class="language-css"></span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>构建后的 js 文件：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">injectStyle</span> (ssrContext) &#123;</span><br><span class="line">  <span class="built_in">require</span>(<span class="string">&quot;!!../../../node_modules/_extract-text-webpack-plugin@3.0.2@extract-text-webpack-plugin/dist/loader.js?&#123;\&quot;omit\&quot;:1,\&quot;remove\&quot;:true&#125;!vue-style-loader!css-loader?&#123;\&quot;minimize\&quot;:true,\&quot;sourceMap\&quot;:false&#125;!../../../node_modules/_mpvue-loader@2.0.1@mpvue-loader/lib/style-compiler/index?&#123;\&quot;vue\&quot;:true,\&quot;id\&quot;:\&quot;data-v-32ccf774\&quot;,\&quot;scoped\&quot;:true,\&quot;hasInlineConfig\&quot;:false&#125;!px2rpx-loader?&#123;\&quot;baseDpr\&quot;:1,\&quot;rpxUnit\&quot;:0.5&#125;!postcss-loader?&#123;\&quot;sourceMap\&quot;:true&#125;!../../../node_modules/_mpvue-loader@2.0.1@mpvue-loader/lib/selector?type=styles&amp;index=0!../../../build/rules/test-loader/index.js!./index.vue&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> normalizeComponent = <span class="built_in">require</span>(<span class="string">&quot;!../../../node_modules/_mpvue-loader@2.0.1@mpvue-loader/lib/component-normalizer&quot;</span>)</span><br><span class="line"><span class="comment">/* script */</span></span><br><span class="line"><span class="keyword">import</span> __vue_script__ <span class="keyword">from</span> <span class="string">&quot;!!babel-loader!../../../node_modules/_mpvue-loader@2.0.1@mpvue-loader/lib/selector?type=script&amp;index=0!../../../build/rules/test-loader/index.js!./index.vue&quot;</span></span><br><span class="line"><span class="comment">/* template */</span></span><br><span class="line"><span class="keyword">import</span> __vue_template__ <span class="keyword">from</span> <span class="string">&quot;!!../../../node_modules/_mpvue-loader@2.0.1@mpvue-loader/lib/template-compiler/index?&#123;\&quot;id\&quot;:\&quot;data-v-32ccf774\&quot;,\&quot;hasScoped\&quot;:true,\&quot;transformToRequire\&quot;:&#123;\&quot;video\&quot;:\&quot;src\&quot;,\&quot;source\&quot;:\&quot;src\&quot;,\&quot;img\&quot;:\&quot;src\&quot;,\&quot;image\&quot;:\&quot;xlink:href\&quot;&#125;,\&quot;fileExt\&quot;:&#123;\&quot;template\&quot;:\&quot;wxml\&quot;,\&quot;script\&quot;:\&quot;js\&quot;,\&quot;style\&quot;:\&quot;wxss\&quot;,\&quot;platform\&quot;:\&quot;wx\&quot;&#125;&#125;!../../../node_modules/_mpvue-loader@2.0.1@mpvue-loader/lib/selector?type=template&amp;index=0!../../../build/rules/test-loader/index.js!./index.vue&quot;</span></span><br><span class="line"><span class="comment">/* styles */</span></span><br><span class="line"><span class="keyword">var</span> __vue_styles__ = injectStyle</span><br><span class="line"><span class="comment">/* scopeId */</span></span><br><span class="line"><span class="keyword">var</span> __vue_scopeId__ = <span class="string">&quot;data-v-32ccf774&quot;</span></span><br><span class="line"><span class="comment">/* moduleIdentifier (server only) */</span></span><br><span class="line"><span class="keyword">var</span> __vue_module_identifier__ = <span class="literal">null</span></span><br><span class="line"><span class="keyword">var</span> <span class="title class_">Component</span> = <span class="title function_">normalizeComponent</span>(</span><br><span class="line">  __vue_script__,</span><br><span class="line">  __vue_template__,</span><br><span class="line">  __vue_styles__,</span><br><span class="line">  __vue_scopeId__,</span><br><span class="line">  __vue_module_identifier__</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="title class_">Component</span>.<span class="property">exports</span></span><br></pre></td></tr></table></figure>
+
+<p>mpvue-loader 的主要功能就是将 mpvue 的 .vue 文件输出为一个 Component.exports 对象。</p>
+<h3 id="mpvue-template-compiler"><a href="#mpvue-template-compiler" class="headerlink" title="mpvue-template-compiler"></a>mpvue-template-compiler</h3><p>源码： <code>node_modules/mpvue-template-compiler/build.js</code>。</p>
+<p>mpvue-loader 中会调用 mpvue-template-compiler 实现 template 解析，这样做的目的是为了节约在运行时解析 template 所带来的开销。引用自 <code>mpvue-loader/lib/template-compiler/index.js</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> compiled = compiler.<span class="title function_">compile</span>(html, compilerOptions)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>html 参数就是 .vue 文件的 template 字符串，通过 compile 函数生成 AST 和 render 函数；</li>
+<li>AST 是抽象代码树的含义，它会将 html 标签解析为一个 js 对象，通过该对象最终生成 render 函数；</li>
+<li>执行 render 会生成 vnode 对象，该 vnode 对象对应 template 的结构。</li>
+</ul>
+<p>① 生成了 AST 之后，即是上述的 compiled，会继续执行 compileMPML：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">compileMPML.<span class="title function_">call</span>(<span class="variable language_">this</span>, compiled, html, options)</span><br></pre></td></tr></table></figure>
+
+<p>② compileMPML 是实际生成 wxml 文件的方法，这里不做详述。</p>
+<p>其实呢，<code>mpvue</code> 的 <code>compiler.compile</code> 和 <code>vue</code> 的 <code>compile</code> 生成 <code>AST</code> 是同样的三个步骤：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">baseCompile</span> (template, options) &#123;</span><br><span class="line">    <span class="keyword">var</span> originAst = <span class="title function_">parse</span>(template.<span class="title function_">trim</span>(), options);</span><br><span class="line">    <span class="keyword">var</span> ast = <span class="title function_">markComponent</span>(originAst, options);</span><br><span class="line">    <span class="title function_">optimize</span>(ast, options);</span><br><span class="line">    <span class="keyword">var</span> code = <span class="title function_">generate</span>(ast, options);</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="attr">ast</span>: ast,</span><br><span class="line">        <span class="attr">render</span>: code.<span class="property">render</span>,</span><br><span class="line">        <span class="attr">staticRenderFns</span>: code.<span class="property">staticRenderFns</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>生成 ast：通过 parse 方法生成 ast；</li>
+<li>优化 ast：通过 optimize 优化 ast，主要是对 ast 中的静态节点进行识别和标记；</li>
+<li>生成 render 函数：通过 generate 方法将 ast 转化为 render 函数。</li>
+</ul>
+<p>不同的是 mpvue 解析出的 AST 中的 tag 是对应 WXML 标签 view 的。</p>
+<p>参考文章：</p>
+<p><a href="https://www.imooc.com/read/45/article/769">mpvue原理深入解析36讲</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://zeuscoder.github.io/2020/05/03/js-mpvue/" data-id="clvynbzpz002aazc9a2ct34na" class="article-share-link">
+        分享
+      </a>
+      
+    </footer>
+
+  </div>
+
+  
+  
+<nav class="article-nav">
+  
+  <a href="/2020/09/06/docker/" class="article-nav-link">
+    <strong class="article-nav-caption">前一篇</strong>
+    <div class="article-nav-title">
+      
+      DevOps：Docker 实操笔记
+      
+    </div>
+  </a>
+  
+  
+  <a href="/2020/03/22/js-this/" class="article-nav-link">
+    <strong class="article-nav-caption">后一篇</strong>
+    <div class="article-nav-title">JS：this 备忘录</div>
+  </a>
+  
+</nav>
+
+  
+
+  
+  
+  
+  
+
+</article>
+</section>
+    <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+  <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+  <li><i class="fe fe-bookmark"></i> <span id="busuanzi_value_page_pv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>zeus の blog &copy; 2024</li>
+      
+        <li></li>
+      
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>theme  <a href="https://github.com/zhwangart/hexo-theme-ocean">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+  </main>
+  <aside class="sidebar">
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/zeus.png" alt="zeus の blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/gallery">相册</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="搜索">
+        <i class="fe fe-search"></i>
+        搜索
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="fe fe-feed"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+
+<script src="/js/wrapImage.js"></script>
+
+
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/copybtn.js"></script>
+
+
+
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+  });
+</script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="description" content="穷则独善其身">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    WEB：浅谈前端模块化 |
+    
+    zeus の blog</title>
+  
+  <link rel="shortcut icon" href="/zeus.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+<body>
+  <main class="content">
+    <section class="outer">
+  <article id="post-web-module" class="article article-type-post" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+      
+
+<h1 class="article-title" itemprop="name">
+  WEB：浅谈前端模块化
+</h1>
+
+
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2019/06/09/web-module/" class="article-date">
+  <time datetime="2019-06-09T09:51:17.000Z" itemprop="datePublished">2019-06-09</time>
+</a>
+      
+<div class="article-category">
+  <a class="article-category-link" href="/categories/web/">web</a>
+</div>
+
+    </div>
+    
+
+    
+    
+<div class="tocbot"></div>
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+      
+      <p>前端模块化设计，其目的和组件化相似，是为了提高代码复用性和维护性。</p>
+<span id="more"></span>
+
+<h3 id="模块化设计"><a href="#模块化设计" class="headerlink" title="模块化设计"></a>模块化设计</h3><p>模块化设计（Modular Design）的历史进程主要有以下方式：</p>
+<ol>
+<li>IIFE</li>
+<li>CommonJS</li>
+<li>AMD &amp; CMD</li>
+<li>ES6 Module</li>
+</ol>
+<h4 id="IIFE"><a href="#IIFE" class="headerlink" title="IIFE"></a>IIFE</h4><p>IIFE：立即执行的匿名函数，不会污染全局变量。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> name = <span class="string">&#x27;zeus&#x27;</span></span><br><span class="line">    <span class="keyword">const</span> age = <span class="number">26</span></span><br><span class="line"></span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;try your best&#x27;</span>)</span><br><span class="line">&#125;)()</span><br></pre></td></tr></table></figure>
+
+<h4 id="CommonJS"><a href="#CommonJS" class="headerlink" title="CommonJS"></a>CommonJS</h4><p>CommonJs：模块即对象，运行时加载，只有在允许时才能加载对象。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 导出模块</span></span><br><span class="line"><span class="built_in">exports</span>.<span class="property">name</span> = <span class="string">&#x27;zeus&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 等同于</span></span><br><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span> = &#123;</span><br><span class="line">    <span class="attr">name</span>: <span class="string">&#x27;zeus&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 引入模块</span></span><br><span class="line"><span class="built_in">require</span>(<span class="string">&#x27;person&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>CommonJS 依赖于 Node.js 的环境变量 module exports reqiure global，仅适用于 Node.js 的规范。</p>
+<h4 id="AMD-CMD"><a href="#AMD-CMD" class="headerlink" title="AMD &amp;&amp; CMD"></a>AMD &amp;&amp; CMD</h4><p>AMD（Asynchronous Module Definition）：异步的模块管理。<br>
+具体实现： Requirejs</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">requirejs([<span class="string">&#x27;person&#x27;</span>], <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="comment">// 加载完 person 模块后使用</span></span><br><span class="line">    person.<span class="title function_">run</span>()</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 依赖其他模块定义自己的模块</span></span><br><span class="line"><span class="title function_">define</span>([<span class="string">&#x27;./car&#x27;</span>, <span class="string">&#x27;./house&#x27;</span>], <span class="keyword">function</span>(<span class="params">car, house</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(house.<span class="property">price</span>)</span><br><span class="line">    car.<span class="title function_">drive</span>()</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="attr">name</span>: <span class="string">&#x27;zeus&#x27;</span>,</span><br><span class="line">        <span class="attr">age</span>: <span class="number">26</span>,</span><br><span class="line">        car,</span><br><span class="line">        house</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>CMD（Common Module Definition）：优化的 AMD，崇依赖就近 + 延迟执行。<br>
+具体实现：Seajs</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">define</span>(<span class="keyword">function</span>(<span class="params">car, house</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (***) &#123;</span><br><span class="line">        <span class="built_in">require</span>(<span class="string">&#x27;house&#x27;</span>)</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(house.<span class="property">price</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (***) &#123;</span><br><span class="line">        <span class="built_in">require</span>(<span class="string">&#x27;car&#x27;</span>)</span><br><span class="line">        car.<span class="title function_">drive</span>()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="attr">name</span>: <span class="string">&#x27;zeus&#x27;</span>,</span><br><span class="line">        <span class="attr">age</span>: <span class="number">26</span>,</span><br><span class="line">        car,</span><br><span class="line">        house</span><br><span class="line">    &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>AMD 和 CMD 只适用浏览器的规范。</p>
+<h4 id="ES6-Module"><a href="#ES6-Module" class="headerlink" title="ES6 Module"></a>ES6 Module</h4><p>ES6 Module: 浏览器和服务器通用的模块化解决方案。</p>
+<ul>
+<li>与 CommonJS相似，对循环依赖以及单个 exports 的支持。</li>
+<li>与 AMD 相似，直接支持异步加载和可配置模块加载。</li>
+<li>结构可以静态分析。</li>
+<li>script 标签加载：&lt;script type&#x3D;”module”&gt;&lt;&#x2F;script&gt;</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> name = <span class="string">&#x27;zeus&#x27;</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">    name,</span><br><span class="line">    <span class="attr">age</span>: <span class="number">26</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 如果多次重复执行同一句import语句，那么只会执行一次，而不会执行多次。</span></span><br><span class="line"><span class="comment">// 因此不同的脚本加载同个模块，得到的是同一个实例。（重点）</span></span><br><span class="line"><span class="comment">// 按需加载使用 import()，返回 Promise 对象。</span></span><br><span class="line"><span class="comment">// import * as Zeus from &#x27;person&#x27;</span></span><br><span class="line"><span class="keyword">import</span> <span class="title class_">Zeus</span> <span class="keyword">from</span> <span class="string">&#x27;person&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p><em>注意</em>：不同的脚本加载同个模块，得到的是同一个实例。</p>
+<h3 id="模块加载差异"><a href="#模块加载差异" class="headerlink" title="模块加载差异"></a>模块加载差异</h3><p>比较 ES6 Module 与 CommonJS 的差异。</p>
+<h4 id="导出值"><a href="#导出值" class="headerlink" title="导出值"></a>导出值</h4><p>CommonJS：运行时加载，导出的是值的拷贝。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// person.js</span></span><br><span class="line"><span class="keyword">const</span> name = <span class="string">&#x27;zeus&#x27;</span></span><br><span class="line"><span class="keyword">let</span> age = <span class="number">26</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">grow</span>(<span class="params"></span>) &#123;</span><br><span class="line">    age++</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span> = &#123;</span><br><span class="line">    age,</span><br><span class="line">    grow</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// main.js</span></span><br><span class="line"><span class="keyword">const</span> <span class="title class_">Zeus</span> = <span class="built_in">require</span>(<span class="string">&#x27;./person&#x27;</span>)</span><br><span class="line">consle.<span class="title function_">log</span>(<span class="title class_">Zeus</span>.<span class="property">age</span>) <span class="comment">// 26</span></span><br><span class="line"><span class="comment">// 内部方法改变了 age，age 是原始类型的值，引用后会被缓存，因此值不变</span></span><br><span class="line"><span class="title class_">Zeus</span>.<span class="title function_">grow</span>()</span><br><span class="line">consle.<span class="title function_">log</span>(<span class="title class_">Zeus</span>.<span class="property">age</span>) <span class="comment">// 26</span></span><br></pre></td></tr></table></figure>
+
+<p>ES6 Module：编译时输出接口，导出的是值的引用，实时绑定。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// person.js</span></span><br><span class="line"><span class="keyword">const</span> name = <span class="string">&#x27;zeus&#x27;</span></span><br><span class="line"><span class="keyword">let</span> age = <span class="number">26</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">grow</span>(<span class="params"></span>) &#123;</span><br><span class="line">    age++</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">    age,</span><br><span class="line">    grow</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// main.js</span></span><br><span class="line"><span class="keyword">import</span> <span class="title class_">Zeus</span> <span class="keyword">from</span> <span class="string">&#x27;./person&#x27;</span></span><br><span class="line">consle.<span class="title function_">log</span>(<span class="title class_">Zeus</span>.<span class="property">age</span>) <span class="comment">// 26</span></span><br><span class="line"><span class="comment">// import 只是对值的引用，动态地去被加载的模块取值</span></span><br><span class="line"><span class="title class_">Zeus</span>.<span class="title function_">grow</span>()</span><br><span class="line">consle.<span class="title function_">log</span>(<span class="title class_">Zeus</span>.<span class="property">age</span>) <span class="comment">// 27</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="循环加载"><a href="#循环加载" class="headerlink" title="循环加载"></a>循环加载</h4><p>循环加载：a 脚本的执行依赖 b 脚本，而 b 脚本的执行又依赖 a 脚本。</p>
+<p>CommonJS 的加载原理：CommonJS 模块无论加载多少次，都只会在第一次加载时运行一次，以后再加载，就返回第一次运行的结果，除非手动清除系统缓存。</p>
+<p>CommonJS 的循环加载：一旦出现某个模块被”循环加载”，就只输出已经执行的部分，还未执行的部分不会输出。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// a.js</span></span><br><span class="line"><span class="comment">// 引用 b.js，等待 b.js 执行完毕。</span></span><br><span class="line"><span class="built_in">exports</span>.<span class="property">done</span> = <span class="literal">false</span></span><br><span class="line"><span class="keyword">var</span> b = <span class="built_in">require</span>(<span class="string">&#x27;./b.js&#x27;</span>)</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;在 a.js 之中，b.done = %j&#x27;</span>, b.<span class="property">done</span>)</span><br><span class="line"><span class="built_in">exports</span>.<span class="property">done</span> = <span class="literal">true</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;a.js 执行完毕&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// b.js</span></span><br><span class="line"><span class="comment">// 此时 a.js 只 执行到 exports.done = false</span></span><br><span class="line"><span class="comment">// 只输出已执行的部分，a.done = false</span></span><br><span class="line"><span class="built_in">exports</span>.<span class="property">done</span> = <span class="literal">false</span></span><br><span class="line"><span class="keyword">var</span> a = <span class="built_in">require</span>(<span class="string">&#x27;./a.js&#x27;</span>)</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;在 b.js 之中，a.done = %j&#x27;</span>, a.<span class="property">done</span>)</span><br><span class="line"><span class="built_in">exports</span>.<span class="property">done</span> = <span class="literal">true</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;b.js 执行完毕&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// main.js</span></span><br><span class="line"><span class="comment">// 加载 a.js 时也加载了 b.js，输出了两个模块的日志</span></span><br><span class="line"><span class="keyword">var</span> a = <span class="built_in">require</span>(<span class="string">&#x27;./a.js&#x27;</span>)</span><br><span class="line"><span class="comment">// 谨记：此时加载 b.js 没有再次输出日志，说明没有再次加载 b.js，只是输出缓存 b.js 的执行结果</span></span><br><span class="line"><span class="keyword">var</span> b = <span class="built_in">require</span>(<span class="string">&#x27;./b.js&#x27;</span>)</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;在 main.js 之中, a.done=%j, b.done=%j&#x27;</span>, a.<span class="property">done</span>, b.<span class="property">done</span>)</span><br><span class="line"></span><br><span class="line">$ node main.<span class="property">js</span></span><br><span class="line"></span><br><span class="line">在 b.<span class="property">js</span> 之中，a.<span class="property">done</span> = <span class="literal">false</span></span><br><span class="line">b.<span class="property">js</span> 执行完毕</span><br><span class="line">在 a.<span class="property">js</span> 之中，b.<span class="property">done</span> = <span class="literal">true</span></span><br><span class="line">a.<span class="property">js</span> 执行完毕</span><br><span class="line">在 main.<span class="property">js</span> 之中, a.<span class="property">done</span>=<span class="literal">true</span>, b.<span class="property">done</span>=<span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>ES6 Module 的循环加载：先默认 import 的引用存在，使用时再获取对应的值。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// even.js</span></span><br><span class="line"><span class="keyword">import</span> &#123; odd &#125; <span class="keyword">from</span> <span class="string">&#x27;./odd&#x27;</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">let</span> counter = <span class="number">0</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">even</span>(<span class="params">n</span>) &#123;</span><br><span class="line">    counter++;</span><br><span class="line">    <span class="keyword">return</span> n === <span class="number">0</span> || <span class="title function_">odd</span>(n - <span class="number">1</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// odd.js</span></span><br><span class="line"><span class="keyword">import</span> &#123; even &#125; <span class="keyword">from</span> <span class="string">&#x27;./even&#x27;</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">odd</span>(<span class="params">n</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> n !== <span class="number">0</span> &amp;&amp; <span class="title function_">even</span>(n - <span class="number">1</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$ babel-node</span><br><span class="line">&gt; <span class="keyword">import</span> * <span class="keyword">as</span> m <span class="keyword">from</span> <span class="string">&#x27;./even.js&#x27;</span></span><br><span class="line">&gt; m.<span class="title function_">even</span>(<span class="number">10</span>)</span><br><span class="line"><span class="literal">true</span></span><br><span class="line">&gt; m.<span class="property">counter</span></span><br><span class="line"><span class="number">6</span></span><br><span class="line">&gt; m.<span class="title function_">even</span>(<span class="number">20</span>)</span><br><span class="line"><span class="literal">true</span></span><br><span class="line">&gt; m.<span class="property">counter</span></span><br><span class="line"><span class="number">17</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h3><p>UMD(Universal Module Definition)：提供一个前后端跨平台的解决方案(支持AMD与CommonJS模块方式)。</p>
+<p>UMD的实现：</p>
+<ol>
+<li>先判断是否支持Node.js模块格式（exports是否存在），存在则使用Node.js模块格式。</li>
+<li>再判断是否支持AMD（define是否存在），存在则使用AMD方式加载模块。</li>
+<li>前两个都不存在，则将模块公开到全局（window或global）。</li>
+</ol>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// if the module has no dependencies, the above pattern can be simplified to</span></span><br><span class="line">(<span class="keyword">function</span> (<span class="params">root, factory</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> define === <span class="string">&#x27;function&#x27;</span> &amp;&amp; define.<span class="property">amd</span>) &#123;</span><br><span class="line">        <span class="comment">// AMD. Register as an anonymous module.</span></span><br><span class="line">        <span class="title function_">define</span>([], factory);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="built_in">exports</span> === <span class="string">&#x27;object&#x27;</span>) &#123;</span><br><span class="line">        <span class="comment">// Node. Does not work with strict CommonJS, but</span></span><br><span class="line">        <span class="comment">// only CommonJS-like environments that support module.exports,</span></span><br><span class="line">        <span class="comment">// like Node.</span></span><br><span class="line">        <span class="variable language_">module</span>.<span class="property">exports</span> = <span class="title function_">factory</span>();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Browser globals (root is window)</span></span><br><span class="line">        root.<span class="property">returnExports</span> = <span class="title function_">factory</span>();</span><br><span class="line">&#125;</span><br><span class="line">&#125;(<span class="variable language_">this</span>, <span class="keyword">function</span> (<span class="params"></span>) &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Just return a value to define the module export.</span></span><br><span class="line">    <span class="comment">// This example returns an object, but the module</span></span><br><span class="line">    <span class="comment">// can return a function as the exported value.</span></span><br><span class="line">    <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">&#125;));</span><br></pre></td></tr></table></figure>
+
+<p>参考文章：</p>
+<p>[1] <a href="https://mp.weixin.qq.com/s/a_mI5w5bCxrvHrhogRkKVQ">从 IIFE 聊到 Babel 带你深入了解前端模块化发展体系</a></p>
+<p>[2] <a href="http://es6.ruanyifeng.com/#docs/module-loader">Module 的加载实现</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://zeuscoder.github.io/2019/06/09/web-module/" data-id="clvynbzpj001sazc96huhdgku" class="article-share-link">
+        分享
+      </a>
+      
+<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/WEB/" rel="tag">WEB</a></li></ul>
+
+    </footer>
+
+  </div>
+
+  
+  
+<nav class="article-nav">
+  
+  <a href="/2019/06/12/web-cors/" class="article-nav-link">
+    <strong class="article-nav-caption">前一篇</strong>
+    <div class="article-nav-title">
+      
+      WEB：躲不了的前端跨域
+      
+    </div>
+  </a>
+  
+  
+  <a href="/2019/06/02/js-prototype/" class="article-nav-link">
+    <strong class="article-nav-caption">后一篇</strong>
+    <div class="article-nav-title">JS：简述原型与原型链</div>
+  </a>
+  
+</nav>
+
+  
+
+  
+  
+  
+  
+
+</article>
+</section>
+    <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+  <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+  <li><i class="fe fe-bookmark"></i> <span id="busuanzi_value_page_pv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>zeus の blog &copy; 2024</li>
+      
+        <li></li>
+      
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>theme  <a href="https://github.com/zhwangart/hexo-theme-ocean">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+  </main>
+  <aside class="sidebar">
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/zeus.png" alt="zeus の blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/gallery">相册</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="搜索">
+        <i class="fe fe-search"></i>
+        搜索
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="fe fe-feed"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+
+<script src="/js/wrapImage.js"></script>
+
+
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/copybtn.js"></script>
+
+
+
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+  });
+</script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+</body>
+
+</html>

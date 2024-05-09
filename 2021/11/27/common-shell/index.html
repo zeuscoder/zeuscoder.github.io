@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="description" content="穷则独善其身">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    DevOps：常用快捷键备忘录 |
+    
+    zeus の blog</title>
+  
+  <link rel="shortcut icon" href="/zeus.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+<body>
+  <main class="content">
+    <section class="outer">
+  <article id="post-common-shell" class="article article-type-post" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+      
+
+<h1 class="article-title" itemprop="name">
+  DevOps：常用快捷键备忘录
+</h1>
+
+
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2021/11/27/common-shell/" class="article-date">
+  <time datetime="2021-11-27T05:41:11.000Z" itemprop="datePublished">2021-11-27</time>
+</a>
+      
+    </div>
+    
+
+    
+    
+<div class="tocbot"></div>
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+      
+      <p>不同开发工具的频繁切换，记录下常用好用的快捷键，还是能省下不少时间的。</p>
+<span id="more"></span>
+
+<p>基于 Mac 环境下操作：</p>
+<h3 id="Shell"><a href="#Shell" class="headerlink" title="Shell"></a>Shell</h3><h4 id="移动光标"><a href="#移动光标" class="headerlink" title="移动光标"></a>移动光标</h4><ul>
+<li>移动光标到命令行首：<code>Ctrl + a</code></li>
+<li>移动光标到命令行尾：<code>Ctrl + e</code></li>
+<li>移动到当前单词的开头：<code>Esc + b</code></li>
+<li>移动光标到命令行尾：<code>Esc + f</code></li>
+<li>光标在命令行中光标最后两次出现的位置间进行切换：<code>Ctrl + x + x</code></li>
+</ul>
+<h4 id="删除命令"><a href="#删除命令" class="headerlink" title="删除命令"></a>删除命令</h4><ul>
+<li>剪切光标之前的一个词：<code>Ctrl + w</code></li>
+<li>剪切光标之后的一个词：<code>Alt + d</code></li>
+<li>从当前光标所在位置向左剪切全部命令：<code>Ctrl + u</code></li>
+<li>从当前光标所在位置向右剪切全部命令：<code>Ctrl + k</code></li>
+</ul>
+<h4 id="历史命令"><a href="#历史命令" class="headerlink" title="历史命令"></a>历史命令</h4><ul>
+<li>查看历史命令：<code>history</code></li>
+<li>执行history历史命令列表中第num条命令：<code>!num</code></li>
+<li>执行history历史命令列表中上一条命令：<code>!!</code></li>
+<li>执行含有string字符串的最新命令：<code>!?string?</code></li>
+</ul>
+<h4 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h4><ul>
+<li>按一次补全，按两次列出所有相关信息：<code>Tab</code></li>
+<li>强制终止当前命令：<code>Ctrl + c</code></li>
+<li>__清屏__：<code>Ctrl + l</code></li>
+</ul>
+<h4 id="Shell-脚本教程"><a href="#Shell-脚本教程" class="headerlink" title="Shell 脚本教程"></a>Shell 脚本教程</h4><p><a href="https://www.runoob.com/linux/linux-shell.html">脚本教程</a></p>
+<hr>
+<h3 id="VS-Code"><a href="#VS-Code" class="headerlink" title="VS Code"></a>VS Code</h3><p>VS Code中的每个命令也可以通过使用 <code>Ctrl + Shift + P</code> 和搜索查询的命令提示符来执行。</p>
+<h4 id="代码命令"><a href="#代码命令" class="headerlink" title="代码命令"></a>代码命令</h4><ul>
+<li>选择当前行：<code>Ctrl + K</code></li>
+<li>移动当前行：<code>Alt + up/down</code></li>
+<li>复制当前行：<code>Shift + Alt +up/down</code></li>
+<li>删除当前行：<code>Ctrl + Shift + K</code></li>
+</ul>
+<h4 id="查找命令"><a href="#查找命令" class="headerlink" title="查找命令"></a>查找命令</h4><ul>
+<li>查找跳转到指定行：<code>Ctrl + G</code></li>
+</ul>
+<h4 id="工具命令"><a href="#工具命令" class="headerlink" title="工具命令"></a>工具命令</h4><ul>
+<li>控制台终端显示与隐藏：<code>Ctrl + ～</code></li>
+<li>左侧目录栏显示与隐藏：<code>Ctrl + B</code></li>
+<li>新建一个窗口：<code>Ctrl + Shift + N</code></li>
+</ul>
+<hr>
+<h3 id="Vim"><a href="#Vim" class="headerlink" title="Vim"></a>Vim</h3><p>vi 的最常用的两种模式： <strong>普通模式</strong> | <strong>输入模式</strong></p>
+<ul>
+<li>按指令 <code>i</code> 后会在光标位置开始输入，这时候左下角会有 <strong>— INSERT —</strong> 提示，表示当前正在输入模式。</li>
+<li>要切换到 普通模式 只需要按一下键盘的最左上角 <code>esc</code> 键即可。</li>
+</ul>
+<h4 id="基本操作"><a href="#基本操作" class="headerlink" title="基本操作"></a>基本操作</h4><ul>
+<li>存储文本：<code>:w</code></li>
+<li>退出文本：<code>:q</code></li>
+<li>退出不保存文本：<code>:q!</code></li>
+<li>保存并退出文本：<code>:wq</code></li>
+<li>显示行号：<code>:set nu</code></li>
+<li>不显示行号：<code>:set nonu</code></li>
+<li>删除当前行：<code>dd</code></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://zeuscoder.github.io/2021/11/27/common-shell/" data-id="clvynbzoo000nazc97i6chz8f" class="article-share-link">
+        分享
+      </a>
+      
+    </footer>
+
+  </div>
+
+  
+  
+<nav class="article-nav">
+  
+  <a href="/2022/04/19/web-study/" class="article-nav-link">
+    <strong class="article-nav-caption">前一篇</strong>
+    <div class="article-nav-title">
+      
+      WEB：前端学习网站指南
+      
+    </div>
+  </a>
+  
+  
+  <a href="/2021/11/24/nginx-https/" class="article-nav-link">
+    <strong class="article-nav-caption">后一篇</strong>
+    <div class="article-nav-title">DevOps：Nginx 安装部署 SSL 证书</div>
+  </a>
+  
+</nav>
+
+  
+
+  
+  
+  
+  
+
+</article>
+</section>
+    <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+  <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+  <li><i class="fe fe-bookmark"></i> <span id="busuanzi_value_page_pv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>zeus の blog &copy; 2024</li>
+      
+        <li></li>
+      
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>theme  <a href="https://github.com/zhwangart/hexo-theme-ocean">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+  </main>
+  <aside class="sidebar">
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/zeus.png" alt="zeus の blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/gallery">相册</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="搜索">
+        <i class="fe fe-search"></i>
+        搜索
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="fe fe-feed"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+
+<script src="/js/wrapImage.js"></script>
+
+
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/copybtn.js"></script>
+
+
+
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+  });
+</script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+</body>
+
+</html>

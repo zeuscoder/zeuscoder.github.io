@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="description" content="穷则独善其身">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    Hexo：问题记录 |
+    
+    zeus の blog</title>
+  
+  <link rel="shortcut icon" href="/zeus.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+<body>
+  <main class="content">
+    <section class="outer">
+  <article id="post-hexo-summary" class="article article-type-post" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+      
+
+<h1 class="article-title" itemprop="name">
+  Hexo：问题记录
+</h1>
+
+
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2023/06/20/hexo-summary/" class="article-date">
+  <time datetime="2023-06-20T09:31:30.000Z" itemprop="datePublished">2023-06-20</time>
+</a>
+      
+    </div>
+    
+
+    
+    
+<div class="tocbot"></div>
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+      
+      <p>记录搭建 hexo 博客网站后，在扩展功能问题上的摸索。</p>
+<span id="more"></span>
+
+<p>背景：使用 hexo ocean 主题搭建。</p>
+<h3 id="图片预览放大功能"><a href="#图片预览放大功能" class="headerlink" title="图片预览放大功能"></a>图片预览放大功能</h3><blockquote>
+<p>参考文章: <a href="http://gaothink.top/2020/03/31/%E6%9D%82%E8%AE%B0-Hexo%E6%B7%BB%E5%8A%A0%E5%9B%BE%E7%89%87%E6%94%BE%E5%A4%A7%E5%8A%9F%E8%83%BD/">Hexo 添加图片放大功能</a></p>
+</blockquote>
+<p>本站图片文字太小，需要放大才能看清，于是想添加图片放大功能。发现 Ocean 主题是自带的，需要在配置文件(&#x2F;themes&#x2F;ocean&#x2F;_config.yml)中开启。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">fancybox</span></span><br><span class="line">fancybox: true</span><br></pre></td></tr></table></figure>
+
+<p>配置后行不通，然后查看了 <a href="https://fancyapps.com/fancybox/getting-started/">fancybox</a> 的官方文档和页面元素，原来是使用上出现了问题。这个库需要手动在图片代码上添加代码，而 Hexo 本身编译完的代码并不会帮我们主动处理，正确用法如下：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">&quot;image-a.jpeg&quot;</span> <span class="attr">data-fancybox</span> <span class="attr">data-caption</span>=<span class="string">&quot;Single image&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">&quot;thumbnail-a.jpeg&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>接着想着这样的事还是交给自动化吧，在 <code>/themes/ocean/js/</code> 文件夹下新增 <code>wrapImage.js</code> 文件：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">$(<span class="variable language_">document</span>).<span class="title function_">ready</span>(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="title function_">wrapImageWithFancyBox</span>();</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Wrap images with fancybox support.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">wrapImageWithFancyBox</span>(<span class="params"></span>) &#123;</span><br><span class="line">    $(<span class="string">&#x27;img&#x27;</span>).<span class="title function_">not</span>(<span class="string">&#x27;.sidebar-image img&#x27;</span>).<span class="title function_">not</span>(<span class="string">&#x27;#author-avatar img&#x27;</span>).<span class="title function_">not</span>(<span class="string">&quot;.mdl-menu img&quot;</span>).<span class="title function_">not</span>(<span class="string">&quot;.something-else-logo img&quot;</span>).<span class="title function_">not</span>(<span class="string">&#x27;[title=notice]&#x27;</span>).<span class="title function_">each</span>(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">var</span> $image = $(<span class="variable language_">this</span>);</span><br><span class="line">        <span class="keyword">var</span> imageCaption = $image.<span class="title function_">attr</span>(<span class="string">&#x27;alt&#x27;</span>);</span><br><span class="line">        <span class="keyword">var</span> $imageWrapLink = $image.<span class="title function_">parent</span>(<span class="string">&#x27;a&#x27;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> ($imageWrapLink.<span class="title function_">size</span>() &lt; <span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">var</span> src = <span class="variable language_">this</span>.<span class="title function_">getAttribute</span>(<span class="string">&#x27;src&#x27;</span>);</span><br><span class="line">            <span class="keyword">var</span> idx = src.<span class="title function_">lastIndexOf</span>(<span class="string">&#x27;?&#x27;</span>);</span><br><span class="line">            <span class="keyword">if</span> (idx != -<span class="number">1</span>) &#123;</span><br><span class="line">                src = src.<span class="title function_">substring</span>(<span class="number">0</span>, idx);</span><br><span class="line">            &#125;</span><br><span class="line">            $imageWrapLink = $image.<span class="title function_">wrap</span>(<span class="string">&#x27;&lt;a href=&quot;&#x27;</span> + src + <span class="string">&#x27;&quot;&gt;&lt;/a&gt;&#x27;</span>).<span class="title function_">parent</span>(<span class="string">&#x27;a&#x27;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        $imageWrapLink.<span class="title function_">attr</span>(<span class="string">&#x27;data-fancybox&#x27;</span>, <span class="string">&#x27;images&#x27;</span>);</span><br><span class="line">        <span class="keyword">if</span> (imageCaption) &#123;</span><br><span class="line">            $imageWrapLink.<span class="title function_">attr</span>(<span class="string">&#x27;data-caption&#x27;</span>, imageCaption);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    $(<span class="string">&#x27;[data-fancybox=&quot;images&quot;]&#x27;</span>).<span class="title function_">fancybox</span>(&#123;</span><br><span class="line">      buttons : [ </span><br><span class="line">        <span class="string">&#x27;slideShow&#x27;</span>,</span><br><span class="line">		<span class="string">&#x27;thumbs&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;zoom&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;fullScreen&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;close&#x27;</span></span><br><span class="line">      ],</span><br><span class="line">      thumbs : &#123;</span><br><span class="line">        autoStart : <span class="literal">false</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后一步，在 <code>/themes/ocean/layout/_partial/after-footer.ejs</code> 引入 <code>wrapImage.js</code> 文件即可：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;% <span class="keyword">if</span> (theme.<span class="property">fancybox</span>)&#123; %&gt;</span><br><span class="line">&lt;%- <span class="title function_">js</span>(<span class="string">&#x27;js/wrapImage&#x27;</span>) %&gt;</span><br><span class="line">&lt;%- <span class="title function_">js</span>(<span class="string">&#x27;fancybox/jquery.fancybox.min&#x27;</span>) %&gt;</span><br><span class="line">&lt;% &#125; %&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="文章搜索功能"><a href="#文章搜索功能" class="headerlink" title="文章搜索功能"></a>文章搜索功能</h3>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://zeuscoder.github.io/2023/06/20/hexo-summary/" data-id="clvynbzow000yazc9fyg0czh3" class="article-share-link">
+        分享
+      </a>
+      
+    </footer>
+
+  </div>
+
+  
+  
+<nav class="article-nav">
+  
+  <a href="/2024/01/04/web-chrome-devtool/" class="article-nav-link">
+    <strong class="article-nav-caption">前一篇</strong>
+    <div class="article-nav-title">
+      
+      Web：前端提效工具集合
+      
+    </div>
+  </a>
+  
+  
+  <a href="/2023/05/23/common-git/" class="article-nav-link">
+    <strong class="article-nav-caption">后一篇</strong>
+    <div class="article-nav-title">WEB：常用 git 命令备忘录</div>
+  </a>
+  
+</nav>
+
+  
+
+  
+  
+  
+  
+
+</article>
+</section>
+    <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+  <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+  <li><i class="fe fe-bookmark"></i> <span id="busuanzi_value_page_pv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>zeus の blog &copy; 2024</li>
+      
+        <li></li>
+      
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>theme  <a href="https://github.com/zhwangart/hexo-theme-ocean">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+  </main>
+  <aside class="sidebar">
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/zeus.png" alt="zeus の blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/gallery">相册</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="搜索">
+        <i class="fe fe-search"></i>
+        搜索
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="fe fe-feed"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+
+<script src="/js/wrapImage.js"></script>
+
+
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/copybtn.js"></script>
+
+
+
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+  });
+</script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+</body>
+
+</html>

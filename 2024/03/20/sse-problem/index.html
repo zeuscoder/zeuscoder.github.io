@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="description" content="穷则独善其身">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    SSE：基础用法 |
+    
+    zeus の blog</title>
+  
+  <link rel="shortcut icon" href="/zeus.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+<body>
+  <main class="content">
+    <section class="outer">
+  <article id="post-sse-problem" class="article article-type-post" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+      
+
+<h1 class="article-title" itemprop="name">
+  SSE：基础用法
+</h1>
+
+
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2024/03/20/sse-problem/" class="article-date">
+  <time datetime="2024-03-20T10:38:42.000Z" itemprop="datePublished">2024-03-20</time>
+</a>
+      
+    </div>
+    
+
+    
+    
+<div class="tocbot"></div>
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+      
+      <p>使用 <code>chatgpt</code> 提问后，答案逐字返回出现，其中背后的原理就涉及 SSE 连接机制了。</p>
+<span id="more"></span>
+
+<h3 id="基础用法"><a href="#基础用法" class="headerlink" title="基础用法"></a>基础用法</h3><p><img src="/images/sse-problem/sse-caniuse.png" alt="Can I Use"></p>
+<h4 id="客户端"><a href="#客户端" class="headerlink" title="客户端"></a>客户端</h4><p>除了 IE 浏览器不能用，基本无坑。使用方法简易，具体可参考 <a href="https://developer.mozilla.org/zh-CN/docs/Web/API/EventSource">MDN EventSource</a>。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> evtSource = <span class="keyword">new</span> <span class="title class_">EventSource</span>(<span class="string">&quot;/sse&quot;</span>);</span><br><span class="line"></span><br><span class="line">evtSource.<span class="property">onmessage</span> = <span class="function">(<span class="params">e</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`message: <span class="subst">$&#123;e.data&#125;</span>`</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="服务端"><a href="#服务端" class="headerlink" title="服务端"></a>服务端</h4><p>采用 express.js 实现一个 nodejs 后端服务：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">&#x27;express&#x27;</span>);</span><br><span class="line"><span class="keyword">const</span> cors = <span class="built_in">require</span>(<span class="string">&#x27;cors&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> app = <span class="title function_">express</span>();</span><br><span class="line"><span class="keyword">const</span> port = <span class="number">3000</span>;</span><br><span class="line"></span><br><span class="line">app.<span class="title function_">use</span>(<span class="title function_">cors</span>());</span><br><span class="line"></span><br><span class="line">app.<span class="title function_">get</span>(<span class="string">&#x27;/sse&#x27;</span>, <span class="function">(<span class="params">req, res</span>) =&gt;</span> &#123;</span><br><span class="line">    res.<span class="title function_">set</span>(&#123;</span><br><span class="line">        <span class="string">&#x27;Content-Type&#x27;</span>: <span class="string">&#x27;text/event-stream&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;Connection&#x27;</span>: <span class="string">&#x27;keep-alive&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;Cache-Control&#x27;</span>: <span class="string">&#x27;no-cache, no-transform&#x27;</span>,</span><br><span class="line">        <span class="string">&#x27;X-Accel-Buffering&#x27;</span>: <span class="string">&#x27;no&#x27;</span></span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    res.<span class="title function_">flushHeaders</span>();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">setInterval</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> data = &#123;</span><br><span class="line">            <span class="attr">message</span>: <span class="string">`Current time is <span class="subst">$&#123;<span class="keyword">new</span> <span class="built_in">Date</span>().toLocaleTimeString()&#125;</span>`</span></span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        res.<span class="title function_">write</span>(<span class="string">`data: <span class="subst">$&#123;<span class="built_in">JSON</span>.stringify(data)&#125;</span>\n\n`</span>);</span><br><span class="line">    &#125;, <span class="number">1000</span>);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">app.<span class="title function_">listen</span>(port, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`Server started on port <span class="subst">$&#123;port&#125;</span>`</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="问题记录"><a href="#问题记录" class="headerlink" title="问题记录"></a>问题记录</h3><h4 id="浏览器接收后端数据延迟的问题"><a href="#浏览器接收后端数据延迟的问题" class="headerlink" title="浏览器接收后端数据延迟的问题"></a>浏览器接收后端数据延迟的问题</h4><p>背景：前端通过 <code>EventSource</code> 连接后端时，后端会立即响应并返回数据，且在服务器上也打印出日志，但是浏览器的接口状态一直处于 <code>pending</code> 且 <code>EventStream</code> 无任何数据响应。在等待几分钟（差不多5分钟）后，<strong>浏览器才一次性接收到所有数据</strong>。</p>
+<p>关键：是浏览器接收不到数据流，排除了后端连不上或者断开连接的可能。</p>
+<p>解决方法：</p>
+<p>HTTP 响应头需要添加以下字段：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: text/event-stream</span><br><span class="line">Cache-Control: no-cache, no-transform</span><br><span class="line">Connection: keep-alive</span><br><span class="line">X-Accel-Buffering: no</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><code>Cache-Control</code> 中需要包含 <code>no-transform</code>，开发时，如果使用了 <code>create-react-app</code> 等工具来转发请求，数据流很可能被压缩（检查 proxy 的 compress 配置是否为 true），造成怎么也收不到响应。<a href="https://github.com/facebook/create-react-app/issues/1633">issue</a></p>
+</li>
+<li><p><code>no-transform</code> 是开发环境中的遇到的问题，但是在生产环境仍然还存在问题。</p>
+</li>
+<li><p>如果网站使用 <code>nginx</code> 做反向代理的，默认会对应用的响应做缓冲(buffering)，以至于应用返回的消息没有立马发出去。所以我们需要给http头加上一条 X<code>-Accel-Buffering: no </code>。<a href="https://serverfault.com/questions/801628/for-server-sent-events-sse-what-nginx-proxy-configuration-is-appropriate">issue</a></p>
+</li>
+</ul>
+<p>Nginx 配置：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">  <span class="attribute">proxy_buffering</span> <span class="literal">off</span>;</span><br><span class="line">  <span class="attribute">proxy_cache</span> <span class="literal">off</span>;</span><br><span class="line">  <span class="attribute">proxy_pass_header</span> X-Accel-Buffering;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>排查过程不详述了，一句话总结，<strong>防止对数据流进行压缩或缓存</strong>。</p>
+<p>参考文章：</p>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/EventSource">EventSource</a></p>
+<p><a href="https://www.ruanyifeng.com/blog/2017/05/server-sent_events.html">Server-Sent Events 教程</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/47099953">server-side-events(SSE)开发指南（Node）</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://zeuscoder.github.io/2024/03/20/sse-problem/" data-id="clvynbzpd001lazc90by82mtg" class="article-share-link">
+        分享
+      </a>
+      
+    </footer>
+
+  </div>
+
+  
+  
+<nav class="article-nav">
+  
+  <a href="/2024/05/09/safe-problem/" class="article-nav-link">
+    <strong class="article-nav-caption">前一篇</strong>
+    <div class="article-nav-title">
+      
+      WEB：一次偶然的依赖库安全问题
+      
+    </div>
+  </a>
+  
+  
+  <a href="/2024/01/04/web-chrome-devtool/" class="article-nav-link">
+    <strong class="article-nav-caption">后一篇</strong>
+    <div class="article-nav-title">Web：前端提效工具集合</div>
+  </a>
+  
+</nav>
+
+  
+
+  
+  
+  
+  
+
+</article>
+</section>
+    <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+  <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+  <li><i class="fe fe-bookmark"></i> <span id="busuanzi_value_page_pv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>zeus の blog &copy; 2024</li>
+      
+        <li></li>
+      
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>theme  <a href="https://github.com/zhwangart/hexo-theme-ocean">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+  </main>
+  <aside class="sidebar">
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/zeus.png" alt="zeus の blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/gallery">相册</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="搜索">
+        <i class="fe fe-search"></i>
+        搜索
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="fe fe-feed"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+
+<script src="/js/wrapImage.js"></script>
+
+
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/copybtn.js"></script>
+
+
+
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+  });
+</script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+</body>
+
+</html>
