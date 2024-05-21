@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  
+  
+  
+  <meta name="description" content="穷则独善其身">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>
+    vue2-diff |
+    
+    zeus の blog</title>
+  
+  <link rel="shortcut icon" href="/zeus.ico">
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+  
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<script src="/js/pace.min.js"></script>
+
+<meta name="generator" content="Hexo 7.2.0"></head>
+
+<body>
+  <main class="content">
+    <section class="outer">
+  <article id="post-vue2-diff" class="article article-type-post" itemscope
+  itemprop="blogPost" data-scroll-reveal>
+
+  <div class="article-inner">
+    
+    <header class="article-header">
+      
+
+<h1 class="article-title" itemprop="name">
+  vue2-diff
+</h1>
+
+
+
+    </header>
+    
+
+    
+    <div class="article-meta">
+      <a href="/2023/10/02/vue2-diff/" class="article-date">
+  <time datetime="2023-10-02T15:31:50.000Z" itemprop="datePublished">2023-10-02</time>
+</a>
+      
+    </div>
+    
+
+    
+    
+<div class="tocbot"></div>
+
+    
+
+    <div class="article-entry" itemprop="articleBody">
+      
+      
+      
+      <p>Vue2 diff 算法使用的是<strong>双端比较算法</strong>。</p>
+<span id="more"></span>
+
+<p>核心算法源码位于 <code>src/core/vdom/patch.ts</code> 的 <code>updateChildren</code> 函数</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">updateChildren</span>(<span class="params"></span></span><br><span class="line"><span class="params">    parentElm,</span></span><br><span class="line"><span class="params">    oldCh,</span></span><br><span class="line"><span class="params">    newCh,</span></span><br><span class="line"><span class="params">    insertedVnodeQueue,</span></span><br><span class="line"><span class="params">    removeOnly</span></span><br><span class="line"><span class="params">  </span>) &#123;</span><br><span class="line">    <span class="keyword">let</span> oldStartIdx = <span class="number">0</span></span><br><span class="line">    <span class="keyword">let</span> newStartIdx = <span class="number">0</span></span><br><span class="line">    <span class="keyword">let</span> oldEndIdx = oldCh.<span class="property">length</span> - <span class="number">1</span></span><br><span class="line">    <span class="keyword">let</span> oldStartVnode = oldCh[<span class="number">0</span>]</span><br><span class="line">    <span class="keyword">let</span> oldEndVnode = oldCh[oldEndIdx]</span><br><span class="line">    <span class="keyword">let</span> newEndIdx = newCh.<span class="property">length</span> - <span class="number">1</span></span><br><span class="line">    <span class="keyword">let</span> newStartVnode = newCh[<span class="number">0</span>]</span><br><span class="line">    <span class="keyword">let</span> newEndVnode = newCh[newEndIdx]</span><br><span class="line">    <span class="keyword">let</span> oldKeyToIdx, idxInOld, vnodeToMove, refElm</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (oldStartIdx &lt;= oldEndIdx &amp;&amp; newStartIdx &lt;= newEndIdx) &#123;</span><br><span class="line">      <span class="comment">//...</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意：需要维护四个重要的索引变量（该算法就是双端算法）</p>
+<ul>
+<li>oldStartIdx：旧子节点列表的起始索引</li>
+<li>oldEndIdx：旧子节点列表的结束索引</li>
+<li>newStartIdx：新子节点列表的起始索引</li>
+<li>newEndIdx：新子节点列表的结束索引</li>
+</ul>
+<p>前提：整个 while 循环执行的条件是：头部索引值要小于等于尾部索引值。</p>
+<h2 id="1-比较过程"><a href="#1-比较过程" class="headerlink" title="1. 比较过程"></a>1. 比较过程</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="title function_">isUndef</span>(oldStartVnode)) &#123;</span><br><span class="line">  oldStartVnode = oldCh[++oldStartIdx] <span class="comment">// Vnode has been moved left</span></span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="title function_">isUndef</span>(oldEndVnode)) &#123;</span><br><span class="line">  oldEndVnode = oldCh[--oldEndIdx]</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<p><font color="red">注意：后续在第 5 步，在旧子节点中寻找与新首节点相同 key 的 vnode 过程中，<strong>已处理过的旧子节点</strong>中对应位置的 vnode 会被标记为 undefined，所以无需处理，跳过到下一个索引即可。</font></p>
+<h3 id="1-1-旧头和新头比较"><a href="#1-1-旧头和新头比较" class="headerlink" title="1.1 旧头和新头比较"></a>1.1 旧头和新头比较</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="title function_">sameVnode</span>(oldStartVnode, newStartVnode)) &#123;</span><br><span class="line">  <span class="title function_">patchVnode</span>(oldStartVnode, newStartVnode, insertedVnodeQueue)</span><br><span class="line">  oldStartVnode = oldCh[++oldStartIdx]</span><br><span class="line">  newStartVnode = newCh[++newStartIdx]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-旧尾和新尾比较"><a href="#1-2-旧尾和新尾比较" class="headerlink" title="1.2 旧尾和新尾比较"></a>1.2 旧尾和新尾比较</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="title function_">sameVnode</span>(oldEndVnode, newEndVnode)) &#123;</span><br><span class="line">  <span class="title function_">patchVnode</span>(oldEndVnode, newEndVnode, insertedVnodeQueue)</span><br><span class="line">  oldEndVnode = oldCh[--oldEndIdx]</span><br><span class="line">  newEndVnode = newCh[--newEndIdx]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-3-旧头和新尾比较"><a href="#1-3-旧头和新尾比较" class="headerlink" title="1.3 旧头和新尾比较"></a>1.3 旧头和新尾比较</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="title function_">sameVnode</span>(oldStartVnode, newEndVnode)) &#123;</span><br><span class="line">  <span class="comment">// Vnode moved right</span></span><br><span class="line">  <span class="title function_">patchVnode</span>(</span><br><span class="line">    oldStartVnode,</span><br><span class="line">    newEndVnode,</span><br><span class="line">    insertedVnodeQueue,</span><br><span class="line">    newCh,</span><br><span class="line">    newEndIdx</span><br><span class="line">  )</span><br><span class="line">  canMove &amp;&amp;</span><br><span class="line">    nodeOps.<span class="title function_">insertBefore</span>(</span><br><span class="line">    parentElm,</span><br><span class="line">    oldStartVnode.<span class="property">elm</span>,</span><br><span class="line">    nodeOps.<span class="title function_">nextSibling</span>(oldEndVnode.<span class="property">elm</span>)</span><br><span class="line">    )</span><br><span class="line">  oldStartVnode = oldCh[++oldStartIdx]</span><br><span class="line">  newEndVnode = newCh[--newEndIdx]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-4-旧尾和新头比较"><a href="#1-4-旧尾和新头比较" class="headerlink" title="1.4 旧尾和新头比较"></a>1.4 旧尾和新头比较</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="title function_">sameVnode</span>(oldEndVnode, newStartVnode)) &#123;</span><br><span class="line">  <span class="comment">// Vnode moved left</span></span><br><span class="line">  <span class="title function_">patchVnode</span>(</span><br><span class="line">    oldEndVnode,</span><br><span class="line">    newStartVnode,</span><br><span class="line">    insertedVnodeQueue,</span><br><span class="line">    newCh,</span><br><span class="line">    newStartIdx</span><br><span class="line">  )</span><br><span class="line">  canMove &amp;&amp;</span><br><span class="line">    nodeOps.<span class="title function_">insertBefore</span>(parentElm, oldEndVnode.<span class="property">elm</span>, oldStartVnode.<span class="property">elm</span>)</span><br><span class="line">  oldEndVnode = oldCh[--oldEndIdx]</span><br><span class="line">  newStartVnode = newCh[++newStartIdx]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>小总结：前面 4 步是通过对比找到了可以复用的节点，执行对应的操作，然后更新索引变量。</strong></p>
+<h3 id="1-5-新头和旧中间比较"><a href="#1-5-新头和旧中间比较" class="headerlink" title="1.5 新头和旧中间比较"></a>1.5 新头和旧中间比较</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="title function_">isUndef</span>(idxInOld)) &#123;</span><br><span class="line">   <span class="comment">// New element</span></span><br><span class="line">   <span class="title function_">createElm</span>(</span><br><span class="line">     newStartVnode,</span><br><span class="line">     insertedVnodeQueue,</span><br><span class="line">     parentElm,</span><br><span class="line">     oldStartVnode.<span class="property">elm</span>,</span><br><span class="line">     <span class="literal">false</span>,</span><br><span class="line">     newCh,</span><br><span class="line">     newStartIdx</span><br><span class="line">   )</span><br><span class="line"> &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">   vnodeToMove = oldCh[idxInOld]</span><br><span class="line">   <span class="keyword">if</span> (<span class="title function_">sameVnode</span>(vnodeToMove, newStartVnode)) &#123;</span><br><span class="line">     <span class="title function_">patchVnode</span>(</span><br><span class="line">       vnodeToMove,</span><br><span class="line">       newStartVnode,</span><br><span class="line">       insertedVnodeQueue,</span><br><span class="line">       newCh,</span><br><span class="line">       newStartIdx</span><br><span class="line">     )</span><br><span class="line">     oldCh[idxInOld] = <span class="literal">undefined</span></span><br><span class="line">     canMove &amp;&amp;</span><br><span class="line">       nodeOps.<span class="title function_">insertBefore</span>(</span><br><span class="line">         parentElm,</span><br><span class="line">         vnodeToMove.<span class="property">elm</span>,</span><br><span class="line">         oldStartVnode.<span class="property">elm</span></span><br><span class="line">       )</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">     <span class="comment">// same key but different element. treat as new element</span></span><br><span class="line">     <span class="title function_">createElm</span>(</span><br><span class="line">       newStartVnode,</span><br><span class="line">       insertedVnodeQueue,</span><br><span class="line">       parentElm,</span><br><span class="line">       oldStartVnode.<span class="property">elm</span>,</span><br><span class="line">       <span class="literal">false</span>,</span><br><span class="line">       newCh,</span><br><span class="line">       newStartIdx</span><br><span class="line">     )</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> newStartVnode = newCh[++newStartIdx]</span><br></pre></td></tr></table></figure>
+
+<p>以 newStartVnode 的 key 为标记，在旧子节点中寻找相同 key 的 vnode，如果找到了，则执行 patchVnode 函数，<font color="red">然后将旧子节点中对应位置的 vnode 标记为 undefined，表示该 vnode 已经处理过了</font>。</p>
+<p>如果没找到，则说明是新元素，则执行 createElm 函数，创建新元素。</p>
+<p><strong>小总结：</strong></p>
+<ul>
+<li>旧子节点中没有新子节点中的 key，则说明是新元素，执行 createElm 函数创建新元素。</li>
+<li>旧子节点中有新子节点中的 key，则说明是旧元素，执行 patchVnode 函数更新旧元素。</li>
+</ul>
+<p><font color="red">总结：前面 5 步都是位于循环中的，循环跳出后，需要处理剩余的节点。</font></p>
+<h3 id="1-6-剩余节点的处理"><a href="#1-6-剩余节点的处理" class="headerlink" title="1.6 剩余节点的处理"></a>1.6 剩余节点的处理</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (oldStartIdx &gt; oldEndIdx) &#123;</span><br><span class="line">  <span class="comment">// 新子节点还有剩余</span></span><br><span class="line">  refElm = <span class="title function_">isUndef</span>(newCh[newEndIdx + <span class="number">1</span>]) ? <span class="literal">null</span> : newCh[newEndIdx + <span class="number">1</span>].<span class="property">elm</span></span><br><span class="line">  <span class="title function_">addVnodes</span>(</span><br><span class="line">    parentElm,</span><br><span class="line">    refElm,</span><br><span class="line">    newCh,</span><br><span class="line">    newStartIdx,</span><br><span class="line">    newEndIdx,</span><br><span class="line">    insertedVnodeQueue</span><br><span class="line">  )</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (newStartIdx &gt; newEndIdx) &#123;</span><br><span class="line">  <span class="comment">// 旧子节点还有剩余</span></span><br><span class="line">  <span class="title function_">removeVnodes</span>(oldCh, oldStartIdx, oldEndIdx)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>处理剩余节点：</p>
+<p>如果新子节点还有剩余，则执行 addVnodes 函数，将剩余的新子节点添加到 DOM 中。</p>
+<p>如果旧子节点还有剩余，则执行 removeVnodes 函数，将剩余的旧子节点从 DOM 中移除。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://zeuscoder.github.io/2023/10/02/vue2-diff/" data-id="clwfrfmek0000s8c920r413ag" class="article-share-link">
+        分享
+      </a>
+      
+    </footer>
+
+  </div>
+
+  
+  
+<nav class="article-nav">
+  
+  <a href="/2023/10/04/vue3-diff/" class="article-nav-link">
+    <strong class="article-nav-caption">前一篇</strong>
+    <div class="article-nav-title">
+      
+      vue3-diff
+      
+    </div>
+  </a>
+  
+  
+  <a href="/2023/06/20/hexo-summary/" class="article-nav-link">
+    <strong class="article-nav-caption">后一篇</strong>
+    <div class="article-nav-title">Hexo：问题记录</div>
+  </a>
+  
+</nav>
+
+  
+
+  
+  
+  
+  
+
+</article>
+</section>
+    <footer class="footer">
+  <div class="outer">
+    <div class="float-right">
+      <ul class="list-inline">
+  
+  <li><i class="fe fe-smile-alt"></i> <span id="busuanzi_value_site_uv"></span></li>
+  
+  <li><i class="fe fe-bookmark"></i> <span id="busuanzi_value_page_pv"></span></li>
+  
+</ul>
+    </div>
+    <ul class="list-inline">
+      <li>zeus の blog &copy; 2024</li>
+      
+        <li></li>
+      
+      <li>Powered by <a href="http://hexo.io/" target="_blank">Hexo</a></li>
+      <li>theme  <a href="https://github.com/zhwangart/hexo-theme-ocean">Ocean</a></li>
+    </ul>
+  </div>
+</footer>
+  </main>
+  <aside class="sidebar">
+    <button class="navbar-toggle"></button>
+<nav class="navbar">
+  
+  <div class="logo">
+    <a href="/"><img src="/images/zeus.png" alt="zeus の blog"></a>
+  </div>
+  
+  <ul class="nav nav-main">
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/">主页</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/archives">归档</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/gallery">相册</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link" href="/about">关于</a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-item-link nav-item-search" title="搜索">
+        <i class="fe fe-search"></i>
+        搜索
+      </a>
+    </li>
+  </ul>
+</nav>
+<nav class="navbar navbar-bottom">
+  <ul class="nav">
+    <li class="nav-item">
+      <div class="totop" id="totop">
+  <i class="fe fe-rocket"></i>
+</div>
+    </li>
+    <li class="nav-item">
+      
+      <a class="nav-item-link" target="_blank" href="/atom.xml" title="RSS Feed">
+        <i class="fe fe-feed"></i>
+      </a>
+      
+    </li>
+  </ul>
+</nav>
+<div class="search-form-wrap">
+  <div class="local-search local-search-plugin">
+  <input type="search" id="local-search-input" class="local-search-input" placeholder="Search...">
+  <div id="local-search-result" class="local-search-result"></div>
+</div>
+</div>
+  </aside>
+  
+<script src="/js/jquery-2.0.3.min.js"></script>
+
+
+<script src="/js/jquery.justifiedGallery.min.js"></script>
+
+
+<script src="/js/lazyload.min.js"></script>
+
+
+<script src="/js/busuanzi-2.3.pure.min.js"></script>
+
+
+
+<script src="/js/wrapImage.js"></script>
+
+
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/copybtn.js"></script>
+
+
+
+
+
+<script src="/js/tocbot.min.js"></script>
+
+<script>
+  // Tocbot_v4.7.0  http://tscanlin.github.io/tocbot/
+  tocbot.init({
+    tocSelector: '.tocbot',
+    contentSelector: '.article-entry',
+    headingSelector: 'h1, h2, h3, h4, h5, h6',
+    hasInnerContainers: true,
+    scrollSmooth: true,
+    positionFixedSelector: '.tocbot',
+    positionFixedClass: 'is-position-fixed',
+    fixedSidebarOffset: 'auto',
+  });
+</script>
+
+
+
+<script src="/js/ocean.js"></script>
+
+</body>
+
+</html>
